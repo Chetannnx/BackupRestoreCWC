@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SQL Backup & Restore</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- WinCC -->
+  <script src="./js/webcc.min.js"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./keyboard.css">
+</head>
+
+<body>
+
+<!-- ==========================
+     🔥 TOP BAR
+========================== -->
+<div class="top-bar">
+
+  <button class="auto" onclick="toggleAutoSection()">
+    ⚙ Auto Backup
+  </button>
+
+  <button class="backup" onclick="toggleBackupSection()">
+    💾 Backup
+  </button>
+
+  <button class="restore" onclick="toggleRestoreSection()">
+    ♻ Restore Backup
+  </button>
+
+</div>
+
+<!-- ==========================
+     🔥 AUTO BACKUP SECTION (DEFAULT VISIBLE)
+========================== -->
+<div id="autoSection" class="section">
+
+  <h3>Auto Backup Settings</h3>
+
+  <div class="form-group">
+    <label>Backup Path:</label>
+    <input value="D:\Chetan\DBBackup" readonly disabled>
+  </div>
+
+  <div class="form-group">
+    <label>Interval (Minutes):</label>
+    <input id="backupMinutes" type="number" placeholder="1">
+  </div>
+
+  <div class="form-group">
+    <button class="primary-btn" onclick="startAutoBackup()">
+      Start Auto Backup
+    </button>
+  </div>
+
+</div>
+
+<!-- ==========================
+     🔥 MANUAL BACKUP SECTION
+========================== -->
+<div id="backupSection" class="section hidden">
+
+  <h3>Manual Backup</h3>
+
+  <p>Backup will be saved to:</p>
+  <!-- <b>D:\Chetan\DBBackup</b> -->
+   <input value="D:\Chetan\DBBackup" readonly disabled>
+
+  <div class="form-group">
+    <button class="primary-btn" onclick="manualBackup()">
+      Backup Now
+    </button>
+  </div>
+
+</div>
+
+<!-- ==========================
+     🔥 RESTORE SECTION
+========================== -->
+<div id="restoreSection" class="section hidden">
+
+  <h3>Restore Backup</h3>
+
+  <div class="form-group">
+    <label>Backup File:</label>
+    <input type="file" id="filePicker" accept=".bak" hidden>
+    <input id="restorePath" placeholder="Select backup file" readonly onclick="openFilePicker()">
+  </div>
+
+  <div class="form-group">
+    <button class="restore-btn" onclick="restoreFromPath()">
+      Restore Now
+    </button>
+  </div>
+
+</div>
+
+<!-- ==========================
+     🔥 STATUS BAR
+========================== -->
+<div class="status" id="status">
+  Status: Idle
+</div>
+
+<!-- SCRIPT -->
+<script src="./control.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,103 @@
+{
+  "$schema": "./CWC_manifest_Schema.json",
+  "mver": "1.2.0",
+
+  "control": {
+    "identity": {
+      "name": "BackupCWC",
+      "version": "2.0.0",
+      "displayname": "SQL Backup Dashboard",
+      "icon": "./icon/Backup.ico",
+      "type": "guid://5C1535A1-DAC7-4EEA-8BC2-CD80CF102AA1",
+      "start": "./control/index.html"
+    },
+
+    "contracts": {
+      "api": {
+
+        "methods": {
+          "startBackup": {
+            "description": "Trigger manual backup"
+          },
+          "startAutoBackup": {
+            "description": "Start auto backup process"
+          },
+          "stopAutoBackup": {
+            "description": "Stop auto backup process"
+          },
+          "restoreBackup": {
+            "description": "Restore database from backup"
+          }
+        },
+
+        "events": {
+          "onBackupComplete": {
+            "arguments": {
+              "file": { "type": "string" }
+            },
+            "description": "Triggered when backup is completed"
+          },
+          "onRestoreComplete": {
+            "arguments": {
+              "status": { "type": "string" }
+            },
+            "description": "Triggered when restore is completed"
+          }
+        },
+
+        "properties": {
+
+          "BackupPath": {
+            "type": "string",
+            "default": "D:\\Chetan\\DBBackup"
+          },
+
+          "LastBackupFile": {
+            "type": "string",
+            "default": ""
+          },
+
+          "Status": {
+            "type": "string",
+            "default": "Idle"
+          },
+
+          "AutoBackupInterval": {
+            "type": "number",
+            "default": 1
+          }
+
+        }
+      }
+    },
+
+    "types": {},
+
+    "environment": {
+      "prerequisites": {
+        "renderingspace": {
+          "minwidth": 400,
+          "maxwidth": 1920,
+          "defaultwidth": 900,
+          "minheight": 300,
+          "maxheight": 1080,
+          "defaultheight": 600,
+          "units": "px"
+        }
+      }
+    },
+
+    "metadata": {
+      "author": "Chetan",
+      "description": "SQL Backup & Restore system with auto backup support for WinCC Unified",
+      "keywords": [
+        "backup",
+        "restore",
+        "sql",
+        "wincc unified",
+        "cwc",
+        "automation"
+      ]
+    }
+  }
+}
