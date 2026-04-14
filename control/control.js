@@ -1,69 +1,161 @@
 // ==========================
 // 🔥 API CONFIG
 // ==========================
-// const BACKUP_API = "http://localhost:3000/api/backup";
-// const RESTORE_API = "http://localhost:3000/api/restore";
 const BACKUP_API  = "http://192.168.1.24:3000/api/backup";
 const RESTORE_API = "http://192.168.1.24:3000/api/restore";
 
 // ==========================
 // 🔥 GLOBALS
 // ==========================
-let autoInterval = null;
+let lastAutoBackupTime = null;
+let lastManualBackupTime = null;
+let nextBackupTime = null;
+let backupIntervalMinutes = 0;
+
+let currentSection = "auto";
 
 // ==========================
 // 🔥 STATUS HANDLER
 // ==========================
 function setStatus(message) {
-  const el = document.getElementById("status");
-  if (el) el.innerText = "Status: " + message;
+
+  const autoEl = document.getElementById("autoStatus");
+  const backupEl = document.getElementById("backupStatus");
+  const restoreEl = document.getElementById("restoreStatus");
+
+  if (autoEl) autoEl.classList.add("hidden");
+  if (backupEl) backupEl.classList.add("hidden");
+  if (restoreEl) restoreEl.classList.add("hidden");
+
+  if (currentSection === "auto" && autoEl) {
+    autoEl.innerText = "Auto Status:\n" + message;
+    autoEl.classList.remove("hidden");
+  }
+  else if (currentSection === "backup" && backupEl) {
+    backupEl.innerText = "Backup Status:\n" + message;
+    backupEl.classList.remove("hidden");
+  }
+  else if (currentSection === "restore" && restoreEl) {
+    restoreEl.innerText = "Restore Status:\n" + message;
+    restoreEl.classList.remove("hidden");
+  }
+}
+
+// ==========================
+// 🔥 LOAD STATE
+// ==========================
+window.addEventListener("DOMContentLoaded", function () {
+  loadBackupState();
+
+  // ✅ Always running checker (PLC style)
+  setInterval(checkAutoBackup, 1000);
+});
+
+function loadBackupState() {
+
+  const auto = localStorage.getItem("lastAutoBackupTime");
+  const manual = localStorage.getItem("lastManualBackupTime");
+  const next = localStorage.getItem("nextBackupTime");
+  const interval = localStorage.getItem("backupInterval");
+
+  if (auto) lastAutoBackupTime = new Date(auto);
+  if (manual) lastManualBackupTime = new Date(manual);
+  if (next) nextBackupTime = new Date(next);
+  if (interval) backupIntervalMinutes = parseInt(interval);
+
+  updateStatusDisplay();
+}
+
+// ==========================
+// 🔥 SAVE STATE
+// ==========================
+function saveBackupState() {
+
+  if (lastAutoBackupTime)
+    localStorage.setItem("lastAutoBackupTime", lastAutoBackupTime.toISOString());
+
+  if (lastManualBackupTime)
+    localStorage.setItem("lastManualBackupTime", lastManualBackupTime.toISOString());
+
+  if (nextBackupTime)
+    localStorage.setItem("nextBackupTime", nextBackupTime.toISOString());
+
+  if (backupIntervalMinutes)
+    localStorage.setItem("backupInterval", backupIntervalMinutes.toString());
+}
+
+// ==========================
+// 🔥 STATUS DISPLAY
+// ==========================
+function updateStatusDisplay() {
+
+  let message = "";
+
+  if (currentSection === "auto") {
+
+    if (lastAutoBackupTime) {
+      message += "🕒 Last Auto Backup: " + lastAutoBackupTime.toLocaleString() + "\n";
+    }
+
+    if (nextBackupTime) {
+      message += "⏭ Next Backup: " + nextBackupTime.toLocaleString() + "\n";
+    }
+
+    if (backupIntervalMinutes) {
+      message += "⏱ Interval: " + backupIntervalMinutes + " min";
+    }
+
+    if (!message) message = "No auto backup yet";
+  }
+
+  else if (currentSection === "backup") {
+
+    if (lastManualBackupTime) {
+      message = "🕒 Last Manual Backup:\n" + lastManualBackupTime.toLocaleString();
+    } else {
+      message = "No manual backup yet";
+    }
+  }
+
+  else if (currentSection === "restore") {
+
+    const lastRestore = localStorage.getItem("lastRestoreTime");
+
+    if (lastRestore) {
+      message = "♻ Last Restore:\n" + new Date(lastRestore).toLocaleString();
+    } else {
+      message = "No restore yet";
+    }
+  }
+
+  setStatus(message);
 }
 
 // ==========================
 // 🔥 SECTION TOGGLE
 // ==========================
-// function toggleAutoSection() {
-//   const auto = document.getElementById("autoSection");
-//   const restore = document.getElementById("restoreSection");
-
-//   auto.classList.toggle("hidden");
-//   restore.classList.add("hidden");
-// }
-
-// function toggleRestoreSection() {
-//   const auto = document.getElementById("autoSection");
-//   const restore = document.getElementById("restoreSection");
-
-//   restore.classList.toggle("hidden");
-//   auto.classList.add("hidden");
-// }
-
-// function toggleBackupSection() {
-//   const auto = document.getElementById("autoSection");
-//   const restore = document.getElementById("restoreSection");
-//   const backup = document.getElementById("backupSection");
-
-//   backup.classList.toggle("hidden");
-//   auto.classList.add("hidden");
-//   restore.classList.add("hidden");
-// }
-
 function toggleAutoSection() {
+  currentSection = "auto";
   document.getElementById("autoSection").classList.remove("hidden");
   document.getElementById("backupSection").classList.add("hidden");
   document.getElementById("restoreSection").classList.add("hidden");
+  updateStatusDisplay();
 }
 
 function toggleBackupSection() {
+  currentSection = "backup";
   document.getElementById("backupSection").classList.remove("hidden");
   document.getElementById("autoSection").classList.add("hidden");
   document.getElementById("restoreSection").classList.add("hidden");
+  updateStatusDisplay();
 }
 
 function toggleRestoreSection() {
+  currentSection = "restore";
   document.getElementById("restoreSection").classList.remove("hidden");
   document.getElementById("autoSection").classList.add("hidden");
   document.getElementById("backupSection").classList.add("hidden");
+  updateStatusDisplay();
 }
 
 // ==========================
@@ -71,25 +163,20 @@ function toggleRestoreSection() {
 // ==========================
 async function manualBackup() {
 
-  const path = document.getElementById("backupPath")?.value || "";
-
   if (!confirm("Take backup now?")) return;
 
   setStatus("Taking backup...");
 
   try {
-    const res = await fetch(BACKUP_API, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ path })
-    });
-
+    const res = await fetch(BACKUP_API, { method: "POST" });
     const data = await res.json();
+
     if (!res.ok) throw new Error(data.message);
 
-    setStatus("✅ Backup Created: " + (data.file || ""));
+    lastManualBackupTime = new Date();
+
+    saveBackupState();
+    updateStatusDisplay();
 
   } catch (err) {
     console.error(err);
@@ -98,30 +185,72 @@ async function manualBackup() {
 }
 
 // ==========================
-// 🔥 RESTORE (LATEST)
+// 🔥 AUTO BACKUP CHECK (CORE LOGIC)
 // ==========================
-async function manualRestore() {
+function checkAutoBackup() {
 
-  if (!confirm("⚠ Restore will overwrite DB. Continue?")) return;
+  if (!backupIntervalMinutes || !nextBackupTime) return;
 
-  setStatus("Restoring latest backup...");
+  const now = new Date();
+
+  if (now >= nextBackupTime) {
+
+    runAutoBackup();
+
+    // schedule next
+    nextBackupTime = new Date(now.getTime() + backupIntervalMinutes * 60000);
+
+    saveBackupState();
+  }
+
+  updateStatusDisplay();
+}
+
+// ==========================
+// 🔥 RUN AUTO BACKUP
+// ==========================
+async function runAutoBackup() {
 
   try {
-    const res = await fetch(RESTORE_API, { method: "POST" });
+    const res = await fetch(BACKUP_API, { method: "POST" });
     const data = await res.json();
 
     if (!res.ok) throw new Error(data.message);
 
-    setStatus("✅ Restored: " + (data.file || ""));
+    lastAutoBackupTime = new Date();
+
+    saveBackupState();
 
   } catch (err) {
     console.error(err);
-    setStatus("❌ Restore Failed");
+    setStatus("❌ Auto Backup Failed");
   }
 }
 
 // ==========================
-// 🔥 RESTORE FROM PATH
+// 🔥 START AUTO BACKUP
+// ==========================
+function startAutoBackup() {
+
+  const minutes = parseInt(document.getElementById("backupMinutes").value);
+
+  if (!minutes || minutes <= 0) {
+    alert("Enter valid minutes");
+    return;
+  }
+
+  backupIntervalMinutes = minutes;
+
+  nextBackupTime = new Date(Date.now() + minutes * 60000);
+
+  saveBackupState();
+  updateStatusDisplay();
+
+  setStatus(`⏱ Auto Backup started (${minutes} min)`);
+}
+
+// ==========================
+// 🔥 RESTORE
 // ==========================
 async function restoreFromPath() {
 
@@ -137,117 +266,23 @@ async function restoreFromPath() {
   try {
     const res = await fetch(RESTORE_API, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ path })
     });
 
     const data = await res.json();
     if (!res.ok) throw new Error(data.message);
 
+    localStorage.setItem("lastRestoreTime", new Date().toISOString());
+
     setStatus("✅ Restore Success");
+    updateStatusDisplay();
 
   } catch (err) {
     console.error(err);
     setStatus("❌ Restore Failed");
   }
 }
-
-// ==========================
-// 🔥 AUTO BACKUP (DAYS)
-// ==========================
-function startAutoBackup() {
-
-  const minutes = parseInt(document.getElementById("backupMinutes").value);
-
-  if (!minutes || minutes <= 0) {
-    alert("Enter valid minutes");
-    return;
-  }
-
-  const intervalMs = minutes * 60 * 1000;
-
-  if (autoInterval) {
-    clearInterval(autoInterval);
-  }
-
-  autoInterval = setInterval(async () => {
-
-    console.log("⏱ Auto Backup Triggered");
-
-    try {
-      const res = await fetch(BACKUP_API, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message);
-
-      setStatus("✅ Auto Backup Completed: " + (data.file || ""));
-
-    } catch (err) {
-      console.error(err);
-      setStatus("❌ Auto Backup Failed");
-    }
-
-  }, intervalMs);
-
-  setStatus(`⏱ Auto Backup every ${minutes} minute(s)`);
-}
-
-// ==========================
-// 🔥 STOP AUTO BACKUP
-// ==========================
-function stopAutoBackup() {
-
-  if (autoInterval) {
-    clearInterval(autoInterval);
-    autoInterval = null;
-    setStatus("⏹ Auto Backup Stopped");
-  }
-}
-
-// function openFolderPicker() {
-//   document.getElementById("folderPicker").click();
-// }
-
-// document.getElementById("folderPicker").addEventListener("change", function (e) {
-
-//   const files = e.target.files;
-
-//   if (files.length > 0) {
-//     // Get folder path (approx)
-//     const fullPath = files[0].webkitRelativePath;
-//     const folder = fullPath.split("/")[0];
-
-//     document.getElementById("backupPath").value = folder;
-
-//     setStatus("📁 Folder selected: " + folder);
-//   }
-// });
-
-
-function openFilePicker() {
-  document.getElementById("filePicker").click();
-}
-
-document.getElementById("filePicker").addEventListener("change", function (e) {
-
-  const file = e.target.files[0];
-
-  if (file) {
-    const fullPath = "D:\\Chetan\\DBBackup\\" + file.name;
-
-    document.getElementById("restorePath").value = fullPath;
-
-    setStatus("📄 File selected: " + fullPath);
-  }
-});
 
 // ==========================
 // 🔥 WEBCC START
