@@ -1,4 +1,20 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SQL Backup & Restore</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="./js/webcc.min.js"></script>
+
+ 
+  <link rel="stylesheet" href="./keyboard.css">
+</head>
+
+<body> -->
+
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -6,97 +22,169 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- WinCC -->
+
   <script src="./js/webcc.min.js"></script>
 
   <!-- CSS -->
+
   <link rel="stylesheet" href="./keyboard.css">
 </head>
 
 <body>
 
 <!-- ==========================
-     🔥 TOP BAR
+     🔥 MAIN CARD CONTAINER
 ========================== -->
-<div class="top-bar">
 
-  <button class="auto" onclick="toggleAutoSection()">
-    ⚙ Auto Backup
-  </button>
+<div class="main-card">
 
-  <button class="backup" onclick="toggleBackupSection()">
-    💾 Backup
-  </button>
+  <!-- ==========================
+       🔥 TABS
+  ========================== -->
 
-  <button class="restore" onclick="toggleRestoreSection()">
-    ♻ Restore Backup
-  </button>
+  <div class="tabs">
+    <button class="tab active" onclick="showTab(event,'auto')">Auto Backup</button>
+    <button class="tab" onclick="showTab(event,'backup')">Manual</button>
+    <button class="tab" onclick="showTab(event,'restore')">Restore</button>
+  </div>
 
-</div>
+  <!-- ==========================
+       🔥 TAB CONTENT
+  ========================== -->
 
+  <div class="tab-content">
+
+```
 <!-- ==========================
-     🔥 AUTO BACKUP SECTION (DEFAULT VISIBLE)
+     🔥 AUTO BACKUP
 ========================== -->
-<div id="autoSection" class="section">
+<div id="autoTab" class="tab-pane active">
 
   <h3>Auto Backup Settings</h3>
 
+  <!-- Target Machine -->
   <div class="form-group">
-    <label>Backup Path:</label>
-    <input value="D:\Chetan\DBBackup" readonly disabled>
+    <label>TARGET MACHINE</label>
+    <div class="input-box">
+      <span class="status-dot"></span>
+      <input value="Cold Room Management System" readonly>
+    </div>
   </div>
 
+  <!-- Backup Path -->
   <div class="form-group">
-    <label>Interval (Minutes):</label>
-    <input id="backupMinutes" type="number" placeholder="1">
+    <label>BACKUP PATH</label>
+    <div class="input-box">
+      <input value="D:\Chetan\DBBackup" readonly>
+    </div>
   </div>
 
-  <div class="form-group">
-    <button class="primary-btn" onclick="startAutoBackup()">
-      Start Auto Backup
-    </button>
+  <!-- Interval -->
+  <div class="form-group inline">
+    <div>
+      <label>INTERVAL</label>
+      <div class="input-box small">
+        <input id="backupMinutes" type="number" value="1">
+         <!-- <input id="backupMinutes" type="number" value="1" readonly onclick="openKeyboard(this)"> -->
+        <span class="unit">MIN</span>
+      </div>
+    </div>
+
+    <div>
+      <label>COMPRESSION</label>
+      <div class="input-box small">
+        <input value="Standard (GZ)" readonly>
+      </div>
+    </div>
   </div>
+
+  <!-- Status -->
+  <div class="status" id="autoStatus">
+    ● STATUS: STANDING BY
+    <span class="logs">LOGS</span>
+  </div>
+
+  <!-- Button -->
+  <button class="start-btn" onclick="startAutoBackup()">
+    ▶ Start Auto Backup
+  </button>
 
 </div>
 
 <!-- ==========================
-     🔥 MANUAL BACKUP SECTION
+     🔥 MANUAL BACKUP
 ========================== -->
-<div id="backupSection" class="section hidden">
+<div id="backupTab" class="tab-pane">
 
   <h3>Manual Backup</h3>
 
-  <p>Backup will be saved to:</p>
-  <!-- <b>D:\Chetan\DBBackup</b> -->
-   <input value="D:\Chetan\DBBackup" readonly disabled>
-
   <div class="form-group">
-    <button class="primary-btn" onclick="manualBackup()">
-      Backup Now
-    </button>
+    <label>BACKUP PATH</label>
+    <div class="input-box">
+      <input value="D:\Chetan\DBBackup" readonly>
+    </div>
+  </div>
+
+  <div class="status" id="backupStatus">
+    ● Backup Status: Idle
+  </div>
+
+  <button class="start-btn" onclick="manualBackup()">
+    ▶ Backup Now
+  </button>
+
+</div>
+
+<!-- ==========================
+     🔥 RESTORE
+========================== -->
+<div id="restoreTab" class="tab-pane">
+
+  <h3>Restore Backup</h3>
+
+  <!-- Upload Box -->
+  <div class="upload-box" onclick="openFilePicker()">
+
+    <div class="upload-content" id="uploadContent">
+      <div class="upload-icon">⬆</div>
+      <p class="upload-title">Select Restore Point</p>
+      <p class="upload-sub">Upload .bak or .sql files to begin</p>
+    </div>
+
+    <div class="selected-file hidden" id="selectedFile"></div>
+
+  </div>
+
+  <!-- Hidden File Input -->
+  <input type="file" id="filePicker" accept=".bak,.sql" hidden onchange="handleFileSelect(event)">
+  <input type="text" id="restorePath" hidden>
+
+  <!-- Status -->
+  <div class="status" id="restoreStatus">
+    ● Restore Status: Idle
+  </div>
+
+  <!-- Button -->
+  <button class="start-btn" onclick="restoreFromPath()">
+    ▶ Restore Now
+  </button>
+
+</div>
+```
+
   </div>
 
 </div>
 
 <!-- ==========================
-     🔥 RESTORE SECTION
+     🔥 SCRIPT
 ========================== -->
-<div id="restoreSection" class="section hidden">
 
-  <h3>Restore Backup</h3>
+<script src="./control.js"></script>
 
-  <div class="form-group">
-    <label>Backup File:</label>
-    <input type="file" id="filePicker" accept=".bak" hidden>
-    <input id="restorePath" placeholder="Select backup file" readonly onclick="openFilePicker()">
-  </div>
+</body>
+</html>
 
-  <div class="form-group">
-    <button class="restore-btn" onclick="restoreFromPath()">
-      Restore Now
-    </button>
-  </div>
-
-</div>
 
 <!-- ==========================
      🔥 STATUS BAR
@@ -105,23 +193,25 @@
   Status: Idle
 </div> -->
 
-<!-- AUTO STATUS -->
-<div class="status hidden" id="autoStatus">
+
+<!-- <div class="status hidden" id="autoStatus">
   Auto Status: Idle
 </div>
 
-<!-- BACKUP STATUS -->
+
 <div class="status hidden" id="backupStatus">
   Backup Status: Idle
 </div>
 
-<!-- RESTORE STATUS -->
+
 <div class="status hidden" id="restoreStatus">
   Restore Status: Idle
-</div>
+</div> -->
 
 <!-- SCRIPT -->
 <script src="./control.js"></script>
+
+
 
 </body>
 </html>

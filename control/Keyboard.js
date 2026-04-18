@@ -1,190 +1,372 @@
-// ==========================
-// 🔥 LOCAL DATA (TEMP DB)
-// ==========================
-let cards = [];
+// =========================
+// 🔥 FORMAT VALUE
+// =========================
+function formatValue(val) {
+  if (val === undefined || val === null) return "";
 
-// ==========================
-// 🔥 LOAD + SEARCH
-// ==========================
-function loadCards() {
-  const search = document.getElementById("search")?.value?.toLowerCase() || "";
+  let num = parseFloat(val);
+  if (isNaN(num)) return val.toString();
 
-  let filtered = cards.filter(c =>
-    c.CARD_NO.toLowerCase().includes(search)
-  );
-
-  renderTable(filtered);
+  return num.toFixed(2);
 }
 
-// ==========================
-// 🔥 RENDER TABLE
-// ==========================
-function renderTable(data) {
 
-  const tbody = document.getElementById("tableBody");
-  if (!tbody) return;
+window.showErrorEffect = function (isError) {
 
-  tbody.innerHTML = "";
+  const inputBox = document.querySelector(".display");
+  const enterBtn = document.querySelector(".enter"); // ENTER button
 
-  if (data.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="3">❌ No Data</td></tr>`;
-    return;
+  if (!inputBox || !enterBtn) return;
+
+  if (isError) {
+
+    // 🔴 RED + SHAKE
+    inputBox.classList.add("error");
+    inputBox.classList.add("shake");
+
+    // ⛔ DISABLE ENTER
+    enterBtn.disabled = true;
+    enterBtn.classList.add("disabled");
+
+  } else {
+
+    // ✅ REMOVE ERROR
+    inputBox.classList.remove("error");
+    inputBox.classList.remove("shake");
+
+    // ✅ ENABLE ENTER
+    enterBtn.disabled = false;
+    enterBtn.classList.remove("disabled");
   }
 
-  data.forEach(row => {
+  // remove shake after animation
+  setTimeout(() => {
+    inputBox.classList.remove("shake");
+  }, 300);
+};
 
-    const tr = document.createElement("tr");
+// =========================
+// 🔥 VARIABLES
+// =========================
+const keyboardDiv = document.getElementById("keyboard");
 
-    tr.innerHTML = `
-      <td>${row.CARD_NO}</td>
-      <td style="color:${row.CARD_STATUS == 1 ? 'lightgreen' : 'red'}">
-        ${row.CARD_STATUS == 1 ? "Active" : "Block"}
-      </td>
-      <td>
-        <button onclick="editCard('${row.CARD_NO}')">Edit</button>
-        <button onclick="deleteCard('${row.CARD_NO}')">Delete</button>
-      </td>
+let currentValue = "";
+let cursorPos = 0;
+
+let currentField = "";
+
+let currentUnit = "";
+let currentTitle = "";
+let oldValue = "";
+
+let currentTag = "";
+let currentMin = null;
+let currentMax = null;
+
+// =========================
+// 🔥 LAYOUT
+// =========================
+const layout = [
+  ["1","2","3","⌫"],
+  ["4","5","6","CLEAR"],
+  ["7","8","9","ENTER"],
+  [".","0","-"]
+];
+
+// =========================
+// 🔥 INIT KEYBOARD (ONLY ONCE)
+// =========================
+function initKeyboard(data) {
+
+  currentField = data.field || "";
+  currentTitle = data.title || data.field || "";
+
+  currentValue = formatValue(data.value);
+  oldValue = formatValue(data.value);
+
+  cursorPos = currentValue.length;
+
+  currentTag = data.tag || "";
+  currentUnit = data.unit || "";
+
+  // ✅ SET RANGE ALSO HERE
+  currentMin = data.min ?? currentMin;
+  currentMax = data.max ?? currentMax;
+
+  buildKeyboard();
+}
+
+
+
+
+// =========================
+// 🔥 UPDATE RANGE ONLY
+// =========================
+function updateRange(min, max) {
+
+  currentMin = min ?? currentMin;
+  currentMax = max ?? currentMax;
+
+  const rangeDiv = document.querySelector(".range-bar");
+
+  if (rangeDiv) {
+    rangeDiv.innerHTML = `
+      <span>Min: ${currentMin != null ? formatValue(currentMin) : "-"}</span>
+      <span>Max: ${currentMax != null ? formatValue(currentMax) : "-"}</span>
     `;
-
-    tbody.appendChild(tr);
-  });
-}
-
-// ==========================
-// 🔥 INSERT
-// ==========================
-function insertCardUI() {
-
-  const cardNo = document.getElementById("cardNo").value.trim();
-  const status = document.getElementById("status").value;
-
-  if (!cardNo) {
-    alert("Enter Card No");
-    return;
   }
-
-  // Duplicate check
-  const exists = cards.some(c => c.CARD_NO === cardNo);
-
-  if (exists) {
-    alert("❌ Card already exists");
-    return;
-  }
-
-  // CALL API
-  window.CWC_API.insert({
-    CARD_NO: cardNo,
-    CARD_STATUS: parseInt(status)
-  });
-
-  closeAddPopup();
 }
 
-// ==========================
-// 🔥 EDIT
-// ==========================
-function editCard(cardNo) {
+// =========================
+// 🔥 SAFE WRITE
+// =========================
+function sendValue() {
 
-  const card = cards.find(c => c.CARD_NO === cardNo);
+  if (typeof HMIRuntime !== "undefined") {
 
-  if (!card) return;
-
-  const newStatus = prompt("Enter Status (1=Active, 0=Block):", card.CARD_STATUS);
-
-  if (newStatus === null) return;
-
-  window.CWC_API.update({
-    CARD_NO: cardNo,
-    CARD_STATUS: parseInt(newStatus)
-  });
-}
-
-// ==========================
-// 🔥 DELETE
-// ==========================
-function deleteCard(cardNo) {
-
-  if (!confirm("Delete " + cardNo + "?")) return;
-
-  window.CWC_API.delete(cardNo);
-}
-
-// ==========================
-// 🔥 POPUP
-// ==========================
-function openAddPopup() {
-  document.getElementById("addPopup").style.display = "flex";
-}
-
-function closeAddPopup() {
-  document.getElementById("addPopup").style.display = "none";
-}
-
-// ==========================
-// 🔥 CWC API (MAIN CORE)
-// ==========================
-window.CWC_API = {
-
-  insert: function(data) {
-
-    console.log("📤 Insert:", data);
-
-    cards.push({
-      CARD_NO: data.CARD_NO,
-      CARD_STATUS: data.CARD_STATUS
-    });
-
-    // 🔥 WRITE TO HMI TAG (optional)
-    if (typeof HMIRuntime !== "undefined") {
-      HMIRuntime.Tags.SysFct.SetTagValue("CARD_NO", data.CARD_NO);
-      HMIRuntime.Tags.SysFct.SetTagValue("CARD_STATUS", data.CARD_STATUS);
+    if (currentTag) {
+      HMIRuntime.Tags.SysFct.SetTagValue(currentTag, currentValue);
     }
 
-    loadCards();
-  },
+  } else {
+    console.log("👉 SIM VALUE:", currentTag, currentValue);
+  }
+}
 
-  update: function(data) {
+// =========================
+// 🔥 VALIDATION
+// =========================
+function isValidValue(val) {
 
-    console.log("✏️ Update:", data);
+  if (
+    val === "" ||
+    val === "." ||
+    val === "-" ||
+    val === "-." ||
+    val === "0."
+  ) return true;
 
-    let card = cards.find(c => c.CARD_NO === data.CARD_NO);
+  if ((val.match(/\./g) || []).length > 1) return false;
 
-    if (card) {
-      card.CARD_STATUS = data.CARD_STATUS;
+  return true;
+}
+
+// =========================
+// 🔥 KEY HANDLER
+// =========================
+function handleKey(key) {
+
+  let newValue = currentValue.toString();
+
+  switch (key) {
+
+    case "⌫":
+      if (cursorPos > 0) {
+        newValue =
+          newValue.slice(0, cursorPos - 1) +
+          newValue.slice(cursorPos);
+        cursorPos--;
+      }
+      break;
+
+    case "CLEAR":
+      currentValue = "";
+      cursorPos = 0;
+      updateDisplay();
+      sendValue();
+      return;
+
+    case "ENTER":
+
+  // 🔥 SEND VALUE TO control.js
+  if (typeof window.writeValueFromKeyboard === "function") {
+    window.writeValueFromKeyboard(currentValue);
+  }
+
+  // 🔥 CLOSE POPUP
+  if (typeof HMIRuntime !== "undefined") {
+    HMIRuntime.UI.SysFct.ClosePopup("Keyboard");
+  } else {
+    console.log("ENTER (SIM):", currentValue);
+  }
+
+  return;
+
+    default:
+
+      let char = key;
+
+      if (char === "." && currentValue === "") {
+        newValue = "0.";
+        cursorPos = 2;
+      } else {
+
+        if (char === "." && currentValue.includes(".")) return;
+
+        newValue =
+          newValue.slice(0, cursorPos) +
+          char +
+          newValue.slice(cursorPos);
+
+        cursorPos++;
+      }
+  }
+
+  if (isValidValue(newValue)) {
+  currentValue = newValue;
+  updateDisplay();
+
+  // 🔥🔥 ADD THIS HERE (THIS IS THE PLACE YOU ASKED)
+
+  const num = parseFloat(currentValue);
+
+  if (!isNaN(num) && currentMin != null && currentMax != null) {
+
+    if (num < currentMin || num > currentMax) {
+      showErrorEffect(true);   // 🔴 red + disable ENTER
+    } else {
+      showErrorEffect(false);  // ✅ normal + enable ENTER
     }
 
-    loadCards();
-  },
-
-  delete: function(cardNo) {
-
-    console.log("🗑 Delete:", cardNo);
-
-    cards = cards.filter(c => c.CARD_NO !== cardNo);
-
-    loadCards();
-  },
-
-  load: function() {
-    return cards;
+  } else {
+    showErrorEffect(false); // reset when empty / invalid
   }
-};
+}
+}
 
-// ==========================
-// 🔥 KEYBOARD CONNECT
-// ==========================
-window.writeValueFromKeyboard = function(value) {
+// =========================
+// 🔥 UPDATE DISPLAY
+// =========================
+// function updateDisplay() {
+//   const display = document.querySelector(".display");
+//   if (display) display.innerText = currentValue;
+// }
 
-  console.log("⌨️ Keyboard Input:", value);
+// function updateDisplay() {
+//   const display = document.querySelector(".display");
 
-  const input = document.getElementById("cardNo");
+//   if (display) {
+//     display.innerText = currentUnit
+//       ? `${currentValue} ${currentUnit}`
+//       : currentValue;
+//   }
+// }
 
-  if (input) {
-    input.value = value;
+function updateDisplay() {
+  const display = document.querySelector(".display");
+
+  if (display) {
+    display.innerHTML = currentUnit
+      ? `${currentValue} <span class="unit">${currentUnit}</span>`
+      : currentValue;
   }
-};
+}
 
-// ==========================
-// 🔥 INIT
-// ==========================
-window.onload = loadCards;
+
+
+// =========================
+// 🔥 BUILD UI
+// =========================
+function toggleTheme(btn) {
+  document.body.classList.toggle("light-theme");
+
+  if (document.body.classList.contains("light-theme")) {
+    btn.innerText = "☀️";
+  } else {
+    btn.innerText = "🌙";
+  }
+}
+
+function buildKeyboard() {
+
+  keyboardDiv.innerHTML = "";
+
+  // =========================
+  // 🔥 HEADER (TITLE + TOGGLE)
+  // =========================
+  const header = document.createElement("div");
+  header.className = "header";
+
+  // 🔹 TITLE
+  const fieldBox = document.createElement("div");
+  fieldBox.className = "field-box";
+  fieldBox.innerText = currentTitle || "-";
+
+  // 🌙 TOGGLE BUTTON
+  const themeBtn = document.createElement("div");
+  themeBtn.className = "theme-btn";
+
+  // set correct icon
+  themeBtn.innerText = document.body.classList.contains("light-theme") ? "☀️" : "🌙";
+
+  // toggle with reference
+  themeBtn.onclick = () => toggleTheme(themeBtn);
+
+  // append inside header
+  header.appendChild(fieldBox);
+  header.appendChild(themeBtn);
+
+  keyboardDiv.appendChild(header);
+
+  // =========================
+  // 🔥 DISPLAY
+  // =========================
+  const displayDiv = document.createElement("div");
+  displayDiv.className = "display";
+
+  displayDiv.innerHTML = currentUnit
+    ? `${currentValue} <span class="unit">${currentUnit}</span>`
+    : currentValue || "";
+
+  keyboardDiv.appendChild(displayDiv);
+
+  // =========================
+  // 🔥 INFO ROW
+  // =========================
+  const infoRow = document.createElement("div");
+  infoRow.className = "info-row";
+
+  const oldValueDiv = document.createElement("div");
+  oldValueDiv.className = "old-value";
+  oldValueDiv.innerText = "Old Value: " + (oldValue || "-");
+
+  const rangeDiv = document.createElement("div");
+  rangeDiv.className = "range-bar";
+  rangeDiv.innerHTML = `
+    <span>Min: ${currentMin != null ? formatValue(currentMin) : "-"}</span>
+    <span>Max: ${currentMax != null ? formatValue(currentMax) : "-"}</span>
+  `;
+
+  infoRow.appendChild(oldValueDiv);
+  infoRow.appendChild(rangeDiv);
+
+  keyboardDiv.appendChild(infoRow);
+
+  // =========================
+  // 🔥 KEYS GRID
+  // =========================
+  const keysGrid = document.createElement("div");
+  keysGrid.className = "keys-grid";
+
+  layout.flat().forEach(key => {
+
+    const keyDiv = document.createElement("div");
+    keyDiv.className = "key";
+
+    if (key === "ENTER") keyDiv.classList.add("enter");
+    if (key === "⌫") keyDiv.classList.add("backspace");
+    if (key === "CLEAR") keyDiv.classList.add("clear");
+
+    keyDiv.innerText = key;
+    keyDiv.onclick = () => handleKey(key);
+
+    keysGrid.appendChild(keyDiv);
+  });
+
+  keyboardDiv.appendChild(keysGrid);
+}
+
+// =========================
+// 🔥 INIT EMPTY
+// =========================
+buildKeyboard();

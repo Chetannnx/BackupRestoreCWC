@@ -4,6 +4,45 @@
 const BACKUP_API  = "http://192.168.1.24:3000/api/backup";
 const RESTORE_API = "http://192.168.1.24:3000/api/restore";
 
+
+function handleFileSelect(event) {
+  const file = event.target.files[0];
+
+  if (file) {
+    // Hide default content
+    document.getElementById("uploadContent").classList.add("hidden");
+
+    // Show file name inside box
+    const fileDiv = document.getElementById("selectedFile");
+    fileDiv.classList.remove("hidden");
+    fileDiv.innerText = file.name;
+  }
+}
+
+function showTab(event, tabName) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+
+  event.target.classList.add("active");
+  document.getElementById(tabName + "Tab").classList.add("active");
+}
+
+function openFilePicker() {
+  document.getElementById("filePicker").click();
+}
+
+function handleFileSelect(event) {
+  const file = event.target.files[0];
+
+  if (file) {
+    document.getElementById("uploadContent").classList.add("hidden");
+
+    const fileDiv = document.getElementById("selectedFile");
+    fileDiv.classList.remove("hidden");
+    fileDiv.innerText = file.name;
+  }
+}
+
 // ==========================
 // 🔥 GLOBALS
 // ==========================
@@ -89,46 +128,53 @@ function saveBackupState() {
 // ==========================
 function updateStatusDisplay() {
 
-  let message = "";
-
-  if (currentSection === "auto") {
+  // ===== AUTO =====
+  const autoEl = document.getElementById("autoStatus");
+  if (autoEl) {
+    let msg = "";
 
     if (lastAutoBackupTime) {
-      message += "🕒 Last Auto Backup: " + lastAutoBackupTime.toLocaleString() + "\n";
+      msg += "🕒 Last Auto Backup: " + lastAutoBackupTime.toLocaleString() + "\n";
     }
 
     if (nextBackupTime) {
-      message += "⏭ Next Backup: " + nextBackupTime.toLocaleString() + "\n";
+      msg += "⏭ Next Backup: " + nextBackupTime.toLocaleString() + "\n";
     }
 
     if (backupIntervalMinutes) {
-      message += "⏱ Interval: " + backupIntervalMinutes + " min";
+      msg += "⏱ Interval: " + backupIntervalMinutes + " min";
     }
 
-    if (!message) message = "No auto backup yet";
+    if (!msg) msg = "No auto backup yet";
+
+    autoEl.innerText = "Auto Status:\n" + msg;
   }
 
-  else if (currentSection === "backup") {
-
+  // ===== MANUAL BACKUP =====
+  const backupEl = document.getElementById("backupStatus");
+  if (backupEl) {
     if (lastManualBackupTime) {
-      message = "🕒 Last Manual Backup:\n" + lastManualBackupTime.toLocaleString();
+      backupEl.innerText =
+        "Backup Status:\n🕒 Last Backup: " +
+        lastManualBackupTime.toLocaleString();
     } else {
-      message = "No manual backup yet";
+      backupEl.innerText = "Backup Status: No manual backup yet";
     }
   }
 
-  else if (currentSection === "restore") {
-
+  // ===== RESTORE =====
+  const restoreEl = document.getElementById("restoreStatus");
+  if (restoreEl) {
     const lastRestore = localStorage.getItem("lastRestoreTime");
 
     if (lastRestore) {
-      message = "♻ Last Restore:\n" + new Date(lastRestore).toLocaleString();
+      restoreEl.innerText =
+        "Restore Status:\n♻ Last Restore: " +
+        new Date(lastRestore).toLocaleString();
     } else {
-      message = "No restore yet";
+      restoreEl.innerText = "Restore Status: No restore yet";
     }
   }
-
-  setStatus(message);
 }
 
 // ==========================
@@ -283,6 +329,24 @@ async function restoreFromPath() {
     setStatus("❌ Restore Failed");
   }
 }
+
+
+function openFilePicker() {
+  document.getElementById("filePicker").click();
+}
+
+document.getElementById("filePicker").addEventListener("change", function (e) {
+
+  const file = e.target.files[0];
+
+  if (file) {
+    const fullPath = "D:\\Chetan\\DBBackup\\" + file.name;
+
+    document.getElementById("restorePath").value = fullPath;
+
+    setStatus("📄 File selected: " + fullPath);
+  }
+});
 
 // ==========================
 // 🔥 WEBCC START

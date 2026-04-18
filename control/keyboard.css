@@ -8,6 +8,9 @@ body {
   margin: 0;
   padding: 0;
 }
+*{
+  font-family: 'Poppins', sans-serif;
+}
 
 /* ==========================
    🔥 TOP BAR
@@ -28,7 +31,7 @@ body {
 button {
   padding: 12px 20px;
   border: none;
-  border-radius: 8px;
+  /* border-radius: 8px; */
   font-size: 14px;
   cursor: pointer;
   transition: 0.3s;
@@ -40,12 +43,13 @@ button {
 .auto {
   background: #3b82f6;
   color: white;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
+
 }
 
 .auto:hover {
-  background: #2563eb;
+  color: black;
 }
 
 /* ==========================
@@ -54,11 +58,11 @@ button {
 .backup {
   background: #3b82f6;
   color: white;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
 }
 .backup:hover {
-  background: #2563eb;
+  color: black;
 }
 
 /* ==========================
@@ -67,12 +71,12 @@ button {
 .restore {
   background: #ef4444;
   color: white;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
 }
 
 .restore:hover {
-  background: #dc2626;
+  color: black;
 }
 
 /* ==========================
@@ -99,6 +103,8 @@ button {
 ========================== */
 h3 {
   margin-bottom: 15px;
+  color: black;
+  margin-top: auto;
 }
 
 /* ==========================
@@ -117,12 +123,12 @@ h3 {
 .section input {
   width: 28%;
   padding: 10px;
-  margin-top: 5px;
+  /* margin-top: 5px; */
   border-radius: 6px;
   border: none;
   outline: none;
-  background: #0f172a;
-  color: white;
+  /* background: #0f172a;
+  color: white; */
 }
 
 /* ==========================
@@ -143,11 +149,13 @@ h3 {
    🔥 STATUS BAR
 ========================== */
 .status {
-  position: fixed;
-  bottom: 10px;
-  left: 20px;
-  font-size: 14px;
-  color: #94a3b8;
+      /* position: fixed; */
+    bottom: 10px;
+    left: 20px;
+    font-size: 15px;
+    FONT-WEIGHT: 600;
+    color: BLACK;
+    margin-top: 19px;
 }
 
 .form-group {
@@ -217,3 +225,306 @@ h3 {
   padding: 10px 20px;
 }
 
+.top-bar {
+  display: flex;
+  gap: 20px;
+  padding: 15px 30px;
+  border-bottom: 2px solid #e5e7eb; /* light line like your UI */
+}
+
+.top-bar button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  font-weight: 600;
+  color: #64748b;
+  padding: 10px 15px;
+  cursor: pointer;
+  position: relative;
+  border-right: 1px solid #64748b;
+}
+
+/* 🔥 ACTIVE TAB */
+.top-bar button.active {
+  color: black;
+}
+
+/* 🔥 RED UNDERLINE */
+.top-bar button.active::after {
+  content: "";
+  position: absolute;
+  bottom: -16px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: red;
+  border-radius: 2px;
+}
+
+
+
+/* 🔥 BODY FIX */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #f1f5f9;
+  margin: 0;
+}
+
+/* 🔥 CARD SECTION */
+.section {
+  width: 420px;
+  height: auto;
+  margin: 40px auto;
+  padding: 25px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* 🔥 TITLE */
+.section h3 {
+  margin-bottom: 20px;
+  font-size: 20px;
+  color: #111827;
+}
+
+/* 🔥 LABEL */
+.form-group label {
+  display: block;
+  font-size: 14px;
+  color: black;
+  margin-bottom: 6px;
+}
+
+/* 🔥 INPUT BOX WRAPPER */
+.input-box {
+  display: flex;
+  align-items: center;
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 12px 12px;
+  border: 1px solid #e5e7eb;
+}
+
+/* 🔥 INPUT */
+/* .input-box input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-size: 14px;
+  color: #111827;
+} */
+ .input-box input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-size: 14px;
+  color: #111827;
+}
+
+/* 🔥 SMALL INPUT (INTERVAL) */
+.input-box.small {
+  width: 120px;
+  justify-content: space-between;
+}
+
+/* 🔥 UNIT TEXT */
+.unit {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* 🔥 BUTTON */
+.start-btn {
+  width: 100%;
+  margin-top: 25px;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(to right, #10b981, #059669);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* 🔥 BUTTON HOVER */
+/* .start-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 20px rgba(16,185,129,0.3);
+} */
+
+
+
+/* 🔥 UPLOAD BOX */
+.upload-box {
+  border: 2px dashed #d1d5db;
+  border-radius: 16px;
+  padding: 30px;
+  text-align: center;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.upload-box:hover {
+  border-color: #10b981;
+  background: #ecfdf5;
+}
+
+/* 🔥 ICON */
+.upload-icon {
+  font-size: 30px;
+  color: #9ca3af;
+  margin-bottom: 10px;
+}
+
+/* 🔥 TEXT */
+.upload-title {
+  font-weight: 600;
+  color: #374151;
+}
+
+.upload-sub {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+/* 🔥 FILE NAME */
+.file-name {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #111827;
+}
+
+/* 🔥 SELECTED FILE TEXT */
+.selected-file {
+  font-size: 16px;
+  font-weight: 500;
+  color: #065f46;
+}
+
+/* Hide helper */
+.hidden {
+  display: none;
+}
+
+/* ==========================
+   🔥 MAIN CARD (FIX LAYOUT)
+========================== */
+.main-card {
+  width: 480px;
+  margin: 40px auto;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 25px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* ==========================
+   🔥 TABS (FIX UI)
+========================== */
+.tabs {
+  display: flex;
+  gap: 25px;
+  border-bottom: 2px solid #e5e7eb;
+  /* margin-bottom: 25px; */
+}
+
+.tab {
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: #94a3b8;
+  padding-bottom: 10px;
+  cursor: pointer;
+  position: relative;
+}
+
+/* ACTIVE TAB */
+.tab.active {
+  color: #10b981;
+}
+
+/* GREEN LINE */
+.tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #10b981;
+  border-radius: 2px;
+}
+
+/* ==========================
+   🔥 TAB CONTENT SWITCH
+========================== */
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+/* ==========================
+   🔥 REMOVE OLD SECTION STYLE
+========================== */
+.section {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* ==========================
+   🔥 FORM FIX
+========================== */
+.form-group.inline {
+  display: flex;
+  gap: 20px;
+}
+
+/* ==========================
+   🔥 STATUS BAR FIX
+========================== */
+.status {
+  margin-top: 20px;
+  font-size: 13px;
+  color: #6b7280;
+  display: flex;
+  justify-content: space-between;
+}
+
+.logs {
+  color: #10b981;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* ==========================
+   🔥 STATUS DOT
+========================== */
+.status-dot {
+  width: 10px;
+  height: 10px;
+  background: #10b981;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+/* ==========================
+   🔥 INPUT ALIGN FIX
+========================== */
+.input-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
