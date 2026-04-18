@@ -4,6 +4,44 @@
 const BACKUP_API  = "http://192.168.1.24:3000/api/backup";
 const RESTORE_API = "http://192.168.1.24:3000/api/restore";
 
+//=====================
+// ==========================
+// 🔥 OPEN KEYBOARD
+// ==========================
+function openKeyboard(input) {
+
+  const keyboard = document.getElementById("keyboard");
+
+  keyboard.classList.remove("hidden");
+
+  // initialize keyboard
+  initKeyboard({
+    field: "Backup Interval",
+    value: input.value,
+    tag: "backupMinutes",
+    min: 1,
+    max: 1440,
+    unit: "min"
+  });
+
+  // store reference
+  window.currentInput = input;
+}
+
+// ==========================
+// 🔥 RECEIVE VALUE FROM KEYBOARD
+// ==========================
+window.writeValueFromKeyboard = function (val) {
+
+  if (window.currentInput) {
+    window.currentInput.value = val;
+  }
+
+  // optional: update your interval variable
+  backupIntervalMinutes = parseInt(val) || 0;
+};
+//=====================
+
 
 function handleFileSelect(event) {
   const file = event.target.files[0];
@@ -19,12 +57,27 @@ function handleFileSelect(event) {
   }
 }
 
+// function showTab(event, tabName) {
+//   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+//   document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+
+//   event.target.classList.add("active");
+//   document.getElementById(tabName + "Tab").classList.add("active");
+// }
 function showTab(event, tabName) {
+
+  // 🔥 SET CURRENT SECTION (IMPORTANT)
+  currentSection = tabName;
+
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
   document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
 
-  event.target.classList.add("active");
+  if (event) event.target.classList.add("active");
+
   document.getElementById(tabName + "Tab").classList.add("active");
+
+  // 🔥 FORCE STATUS UPDATE
+  updateStatusDisplay();
 }
 
 function openFilePicker() {
@@ -51,32 +104,51 @@ let lastManualBackupTime = null;
 let nextBackupTime = null;
 let backupIntervalMinutes = 0;
 
-let currentSection = "auto";
+// let currentSection = "auto";
 
 // ==========================
 // 🔥 STATUS HANDLER
 // ==========================
-function setStatus(message) {
+// function setStatus(message) {
+
+//   const autoEl = document.getElementById("autoStatus");
+//   const backupEl = document.getElementById("backupStatus");
+//   const restoreEl = document.getElementById("restoreStatus");
+
+//   if (autoEl) autoEl.classList.add("hidden");
+//   if (backupEl) backupEl.classList.add("hidden");
+//   if (restoreEl) restoreEl.classList.add("hidden");
+
+//   if (currentSection === "auto" && autoEl) {
+//     autoEl.innerText = "Auto Status:\n" + message;
+//     autoEl.classList.remove("hidden");
+//   }
+//   else if (currentSection === "backup" && backupEl) {
+//     backupEl.innerText = "Backup Status:\n" + message;
+//     backupEl.classList.remove("hidden");
+//   }
+//   else if (currentSection === "restore" && restoreEl) {
+//     restoreEl.innerText = "Restore Status:\n" + message;
+//     restoreEl.classList.remove("hidden");
+//   }
+// }
+
+function setStatus(type, message) {
 
   const autoEl = document.getElementById("autoStatus");
   const backupEl = document.getElementById("backupStatus");
   const restoreEl = document.getElementById("restoreStatus");
 
-  if (autoEl) autoEl.classList.add("hidden");
-  if (backupEl) backupEl.classList.add("hidden");
-  if (restoreEl) restoreEl.classList.add("hidden");
-
-  if (currentSection === "auto" && autoEl) {
+  if (type === "auto" && autoEl) {
     autoEl.innerText = "Auto Status:\n" + message;
-    autoEl.classList.remove("hidden");
   }
-  else if (currentSection === "backup" && backupEl) {
+
+  if (type === "backup" && backupEl) {
     backupEl.innerText = "Backup Status:\n" + message;
-    backupEl.classList.remove("hidden");
   }
-  else if (currentSection === "restore" && restoreEl) {
+
+  if (type === "restore" && restoreEl) {
     restoreEl.innerText = "Restore Status:\n" + message;
-    restoreEl.classList.remove("hidden");
   }
 }
 
@@ -180,29 +252,29 @@ function updateStatusDisplay() {
 // ==========================
 // 🔥 SECTION TOGGLE
 // ==========================
-function toggleAutoSection() {
-  currentSection = "auto";
-  document.getElementById("autoSection").classList.remove("hidden");
-  document.getElementById("backupSection").classList.add("hidden");
-  document.getElementById("restoreSection").classList.add("hidden");
-  updateStatusDisplay();
-}
+// function toggleAutoSection() {
+//   currentSection = "auto";
+//   document.getElementById("autoSection").classList.remove("hidden");
+//   document.getElementById("backupSection").classList.add("hidden");
+//   document.getElementById("restoreSection").classList.add("hidden");
+//   updateStatusDisplay();
+// }
 
-function toggleBackupSection() {
-  currentSection = "backup";
-  document.getElementById("backupSection").classList.remove("hidden");
-  document.getElementById("autoSection").classList.add("hidden");
-  document.getElementById("restoreSection").classList.add("hidden");
-  updateStatusDisplay();
-}
+// function toggleBackupSection() {
+//   currentSection = "backup";
+//   document.getElementById("backupSection").classList.remove("hidden");
+//   document.getElementById("autoSection").classList.add("hidden");
+//   document.getElementById("restoreSection").classList.add("hidden");
+//   updateStatusDisplay();
+// }
 
-function toggleRestoreSection() {
-  currentSection = "restore";
-  document.getElementById("restoreSection").classList.remove("hidden");
-  document.getElementById("autoSection").classList.add("hidden");
-  document.getElementById("backupSection").classList.add("hidden");
-  updateStatusDisplay();
-}
+// function toggleRestoreSection() {
+//   currentSection = "restore";
+//   document.getElementById("restoreSection").classList.remove("hidden");
+//   document.getElementById("autoSection").classList.add("hidden");
+//   document.getElementById("backupSection").classList.add("hidden");
+//   updateStatusDisplay();
+// }
 
 // ==========================
 // 🔥 MANUAL BACKUP

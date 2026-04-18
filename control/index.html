@@ -27,6 +27,7 @@
 
   <!-- CSS -->
 
+  <link rel="stylesheet" href="./Backup.css">
   <link rel="stylesheet" href="./keyboard.css">
 </head>
 
@@ -84,8 +85,8 @@
     <div>
       <label>INTERVAL</label>
       <div class="input-box small">
-        <input id="backupMinutes" type="number" value="1">
-         <!-- <input id="backupMinutes" type="number" value="1" readonly onclick="openKeyboard(this)"> -->
+        <!-- <input id="backupMinutes" type="number" value="1"> -->
+         <input id="backupMinutes" type="number" value="1" readonly onclick="openKeyboard(this)">
         <span class="unit">MIN</span>
       </div>
     </div>
@@ -207,9 +208,14 @@
 <div class="status hidden" id="restoreStatus">
   Restore Status: Idle
 </div> -->
+<!-- ==========================
+     🔥 KEYBOARD POPUP
+========================== -->
+<div id="keyboard" class="keyboard-popup hidden"></div>
 
 <!-- SCRIPT -->
 <script src="./control.js"></script>
+<script src="./Keyboard.js"></script>
 
 
 

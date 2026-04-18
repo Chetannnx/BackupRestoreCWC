@@ -1,530 +1,336 @@
-/* ==========================
-   🔥 GLOBAL
-========================== */
-body {
-  font-family: 'Poppins', sans-serif;
-  background: white;
-  color: white;
+/* =========================
+   🔥 THEME VARIABLES
+========================= */
+:root {
+  /* DARK (DEFAULT) */
+  --bg-main: #1f2a3a;
+  --bg-gradient: linear-gradient(145deg, #1f2a3a, #0f1724);
+  --box-bg: #2b3a4f;
+
+  --text-main: #ffffff;
+  --text-secondary: #dbeafe;
+
+  --key-bg: #2b3a4f;
+  --key-hover: #334155;
+
+  --enter-bg: rgb(125, 204, 246);
+  --enter-text: #000;
+
+  --clear-bg: rgb(26, 20, 31);
+  --clear-border: rgba(255, 92, 92, 0.2);
+
+  --key-active-bg: #ffffff;
+  --key-active-text: #000000;
+
+  --glow: rgba(59, 130, 246, 0.4);
+}
+
+/* LIGHT THEME */
+.light-theme {
+  --bg-main: #f3f6fb;
+  --bg-gradient: linear-gradient(145deg, #ffffff, #e6ecf5);
+  --box-bg: #ffffff;
+
+  --text-main: #1f2937;
+  --text-secondary: #334155;
+
+  --key-bg: #c3c8cf;
+  --key-hover: #cbd5e1;
+
+  --enter-bg: #3b82f6;
+  --enter-text: #ffffff;
+
+  --clear-bg: #ffecec;
+  --clear-border: rgba(255, 92, 92, 0.3);
+
+  --key-active-bg: #1f2937;
+  --key-active-text: #ffffff;
+
+  --glow: rgba(59, 130, 246, 0.2);
+}
+
+/* =========================
+   🔥 RESET + FONT
+========================= */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+* {
   margin: 0;
   padding: 0;
-}
-*{
-  font-family: 'Poppins', sans-serif;
-}
-
-/* ==========================
-   🔥 TOP BAR
-========================== */
-.top-bar {
-  display: flex;
-  gap: 20px;
-  /* justify-content: space-between; */
-  align-items: center;
-  padding: 15px 30px;
-  /* background: #1e293b; */
-  /* border-bottom: 1px solid #334155; */
+  box-sizing: border-box;
+  user-select: none;
 }
 
-/* ==========================
-   🔥 BUTTONS (COMMON)
-========================== */
-button {
-  padding: 12px 20px;
-  border: none;
-  /* border-radius: 8px; */
-  font-size: 14px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-/* ==========================
-   🔥 AUTO BUTTON
-========================== */
-.auto {
-  background: #3b82f6;
-  color: white;
-  font-size: 18px;
-  font-weight: 600;
-
-}
-
-.auto:hover {
-  color: black;
-}
-
-/* ==========================
-   🔥 BACKUP BUTTON
-========================== */
-.backup {
-  background: #3b82f6;
-  color: white;
-  font-size: 18px;
-  font-weight: 600;
-}
-.backup:hover {
-  color: black;
-}
-
-/* ==========================
-   🔥 RESTORE BUTTON
-========================== */
-.restore {
-  background: #ef4444;
-  color: white;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.restore:hover {
-  color: black;
-}
-
-/* ==========================
-   🔥 SECTION PANEL
-========================== */
-.section {
-  margin: 20px 30px;
-  width: 50%;
-  padding: 20px;
-  background: #1e293b;
-  border-radius: 20px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
-}
-
-/* ==========================
-   🔥 HIDE SECTION
-========================== */
-.hidden {
-  display: none;
-}
-
-/* ==========================
-   🔥 HEADINGS
-========================== */
-h3 {
-  margin-bottom: 15px;
-  color: black;
-  margin-top: auto;
-}
-
-/* ==========================
-   🔥 LABEL
-========================== */
-.section label {
-  display: block;
-  margin-top: 10px;
-  font-size: 14px;
-  color: #cbd5f5;
-}
-
-/* ==========================
-   🔥 INPUT
-========================== */
-.section input {
-  width: 28%;
-  padding: 10px;
-  /* margin-top: 5px; */
-  border-radius: 6px;
-  border: none;
-  outline: none;
-  /* background: #0f172a;
-  color: white; */
-}
-
-/* ==========================
-   🔥 ACTION BUTTON INSIDE SECTION
-========================== */
-.section button {
-  margin-top: 15px;
-
-  background: #22c55e;
-  color: white;
-}
-
-.section button:hover {
-  background: #16a34a;
-}
-
-/* ==========================
-   🔥 STATUS BAR
-========================== */
-.status {
-      /* position: fixed; */
-    bottom: 10px;
-    left: 20px;
-    font-size: 15px;
-    FONT-WEIGHT: 600;
-    color: BLACK;
-    margin-top: 19px;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.primary-btn {
-  background: #22c55e;
-  padding: 10px 16px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-}
-
-.restore-btn {
-  background: #3b82f6;
-  padding: 10px 16px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-}
-
-/* 🔥 MODAL BACKGROUND */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.6);
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  z-index: 999;
-}
-
-/* 🔥 HIDE */
-.hidden {
-  display: none;
-}
-
-/* 🔥 MODAL BOX */
-.modal-box {
-  background: #1e293b;
-  padding: 25px;
-  border-radius: 12px;
-  text-align: center;
-  width: 300px;
-  color: white;
-}
-
-/* 🔥 BUTTONS */
-.modal-actions {
-  margin-top: 20px;
-}
-
-.ok-btn {
-  background: #22c55e;
-  margin-right: 10px;
-  padding: 10px 20px;
-}
-
-.cancel-btn {
-  background: #ef4444;
-  padding: 10px 20px;
-}
-
-.top-bar {
-  display: flex;
-  gap: 20px;
-  padding: 15px 30px;
-  border-bottom: 2px solid #e5e7eb; /* light line like your UI */
-}
-
-.top-bar button {
-  background: none;
-  border: none;
-  font-size: 18px;
-  font-weight: 600;
-  color: #64748b;
-  padding: 10px 15px;
-  cursor: pointer;
-  position: relative;
-  border-right: 1px solid #64748b;
-}
-
-/* 🔥 ACTIVE TAB */
-.top-bar button.active {
-  color: black;
-}
-
-/* 🔥 RED UNDERLINE */
-.top-bar button.active::after {
-  content: "";
-  position: absolute;
-  bottom: -16px;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: red;
-  border-radius: 2px;
-}
-
-
-
-/* 🔥 BODY FIX */
+/* =========================
+   🔥 BODY
+========================= */
 body {
   font-family: 'Poppins', sans-serif;
-  background: #f1f5f9;
-  margin: 0;
+  transition: all 0.3s ease;
 }
 
-/* 🔥 CARD SECTION */
-.section {
-  width: 420px;
-  height: auto;
-  margin: 40px auto;
-  padding: 25px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+/* =========================
+   🔥 KEYBOARD ROOT
+========================= */
+#keyboard {
+  width: 368px;
+  padding: 5px 20px 20px;
+
+  background: var(--bg-gradient);
+  color: var(--text-main);
+
+  /* display: flex; */
+  flex-direction: column;
+
+  transition: all 0.3s ease;
 }
 
-/* 🔥 TITLE */
-.section h3 {
-  margin-bottom: 20px;
-  font-size: 20px;
-  color: #111827;
-}
-
-/* 🔥 LABEL */
-.form-group label {
-  display: block;
-  font-size: 14px;
-  color: black;
+/* =========================
+   🔥 THEME BUTTON
+========================= */
+.theme-btn {
+  text-align: right;
+  cursor: pointer;
+  font-size: 18px;
   margin-bottom: 6px;
+  color: var(--text-main);
+  transition: transform 0.2s ease;
 }
 
-/* 🔥 INPUT BOX WRAPPER */
-.input-box {
+.theme-btn:hover {
+  transform: scale(1.2);
+}
+
+/* =========================
+   🔥 FIELD TITLE
+========================= */
+.field-box {
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--text-main);
+  padding-bottom: 5px;
+}
+
+/* =========================
+   🔥 DISPLAY BOX
+========================= */
+.display {
+  width: 100%;
+  height: 90px;
+
+  background: var(--box-bg);
+  color: var(--text-main);
+
+  border-radius: 16px;
+  padding: 10px;
+
+  font-size: 38px;
+  font-weight: 600;
+
   display: flex;
   align-items: center;
-  background: #f9fafb;
-  border-radius: 10px;
-  padding: 12px 12px;
-  border: 1px solid #e5e7eb;
+  justify-content: center;
+
+  margin-bottom: 30px;
+
+  box-shadow:
+    0 0 6px var(--glow),
+    0 0 12px var(--glow),
+    0 0 20px var(--glow);
+
+  transition: all 0.3s ease;
 }
 
-/* 🔥 INPUT */
-/* .input-box input {
-  border: none;
-  outline: none;
-  background: transparent;
-  width: 100%;
-  font-size: 14px;
-  color: #111827;
-} */
- .input-box input {
-  border: none;
-  outline: none;
-  background: transparent;
-  width: 100%;
-  font-size: 14px;
-  color: #111827;
+/* UNIT SMALL */
+.display .unit {
+  font-size: 20px;
+  opacity: 0.8;
+  margin-left: 6px;
+  margin-top: 10px;
 }
 
-/* 🔥 SMALL INPUT (INTERVAL) */
-.input-box.small {
-  width: 120px;
+/* =========================
+   🔥 INFO ROW
+========================= */
+.info-row {
+  display: flex;
   justify-content: space-between;
-}
-
-/* 🔥 UNIT TEXT */
-.unit {
-  font-size: 12px;
-  color: #9ca3af;
-}
-
-/* 🔥 BUTTON */
-.start-btn {
-  width: 100%;
-  margin-top: 25px;
-  padding: 14px;
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(to right, #10b981, #059669);
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-/* 🔥 BUTTON HOVER */
-/* .start-btn:hover {
-  transform: scale(1.03);
-  box-shadow: 0 8px 20px rgba(16,185,129,0.3);
-} */
-
-
-
-/* 🔥 UPLOAD BOX */
-.upload-box {
-  border: 2px dashed #d1d5db;
-  border-radius: 16px;
-  padding: 30px;
-  text-align: center;
-  background: #f9fafb;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.upload-box:hover {
-  border-color: #10b981;
-  background: #ecfdf5;
-}
-
-/* 🔥 ICON */
-.upload-icon {
-  font-size: 30px;
-  color: #9ca3af;
   margin-bottom: 10px;
 }
 
-/* 🔥 TEXT */
-.upload-title {
-  font-weight: 600;
-  color: #374151;
-}
-
-.upload-sub {
-  font-size: 13px;
-  color: #9ca3af;
-}
-
-/* 🔥 FILE NAME */
-.file-name {
-  margin-top: 10px;
+.old-value,
+.range-bar {
   font-size: 14px;
-  color: #111827;
+  color: var(--text-main);
 }
 
-/* 🔥 SELECTED FILE TEXT */
-.selected-file {
+/* =========================
+   🔥 KEYS GRID
+========================= */
+.keys-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+/* =========================
+   🔥 KEYS
+========================= */
+.key {
+  width: 75px;
+  height: 70px;
+
+  border-radius: 18px;
+  background: var(--key-bg);
+  color: var(--text-secondary);
+
   font-size: 16px;
   font-weight: 500;
-  color: #065f46;
-}
 
-/* Hide helper */
-.hidden {
-  display: none;
-}
-
-/* ==========================
-   🔥 MAIN CARD (FIX LAYOUT)
-========================== */
-.main-card {
-  width: 480px;
-  margin: 40px auto;
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 25px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-}
-
-/* ==========================
-   🔥 TABS (FIX UI)
-========================== */
-.tabs {
-  display: flex;
-  gap: 25px;
-  border-bottom: 2px solid #e5e7eb;
-  /* margin-bottom: 25px; */
-}
-
-.tab {
-  background: none;
-  border: none;
-  font-size: 16px;
-  font-weight: 600;
-  color: #94a3b8;
-  padding-bottom: 10px;
-  cursor: pointer;
-  position: relative;
-}
-
-/* ACTIVE TAB */
-.tab.active {
-  color: #10b981;
-}
-
-/* GREEN LINE */
-.tab.active::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: #10b981;
-  border-radius: 2px;
-}
-
-/* ==========================
-   🔥 TAB CONTENT SWITCH
-========================== */
-.tab-pane {
-  display: none;
-}
-
-.tab-pane.active {
-  display: block;
-}
-
-/* ==========================
-   🔥 REMOVE OLD SECTION STYLE
-========================== */
-.section {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  background: none;
-  box-shadow: none;
-}
-
-/* ==========================
-   🔥 FORM FIX
-========================== */
-.form-group.inline {
-  display: flex;
-  gap: 20px;
-}
-
-/* ==========================
-   🔥 STATUS BAR FIX
-========================== */
-.status {
-  margin-top: 20px;
-  font-size: 13px;
-  color: #6b7280;
-  display: flex;
-  justify-content: space-between;
-}
-
-.logs {
-  color: #10b981;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-/* ==========================
-   🔥 STATUS DOT
-========================== */
-.status-dot {
-  width: 10px;
-  height: 10px;
-  background: #10b981;
-  border-radius: 50%;
-  margin-right: 8px;
-}
-
-/* ==========================
-   🔥 INPUT ALIGN FIX
-========================== */
-.input-box {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition: all 0.15s ease;
+}
+
+.key:hover {
+  background: var(--key-hover);
+}
+
+.key:active {
+  transform: scale(0.95);
+  background: var(--key-active-bg);
+  color: var(--key-active-text);
+}
+
+/* =========================
+   🔥 ENTER KEY
+========================= */
+.key.enter {
+  background: var(--enter-bg);
+  color: var(--enter-text);
+  font-weight: 600;
+
+  grid-row: span 2;
+  height: 100%;
+}
+
+/* =========================
+   🔥 BACKSPACE
+========================= */
+.key.backspace {
+  color: red;
+  font-weight: 600;
+}
+
+/* =========================
+   🔥 CLEAR
+========================= */
+.key.clear {
+  color: red;
+  font-weight: 600;
+  background: var(--clear-bg);
+  border: 2px solid var(--clear-border);
+}
+
+.theme-btn {
+  transition: transform 0.3s ease;
+}
+
+.theme-btn:active {
+  transform: rotate(180deg);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.field-box {
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--text-main);
+
+  text-align: left;
+  flex: 1;                 /* 🔥 takes full left space */
+}
+
+.theme-btn {
+  font-size: 18px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;             /* 🔥 fixed width */
+}
+
+/* 🔴 Error Style */
+.display.error {
+  border: 2px solid #ff3b3b;
+  box-shadow: 0 0 10px #ff3b3b;
+}
+
+/* 📳 Shake */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-4px); }
+  100% { transform: translateX(0); }
+}
+
+.display.shake {
+  animation: shake 0.3s;
+}
+
+/* ⛔ Disabled ENTER */
+.enter.disabled {
+  background: #888;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+
+.hidden {
+  display: none !important;
+}
+
+/* =========================
+   🔥 SMOOTH DRAG OPTIMIZATION
+========================= */
+.keyboard-popup {
+  position: fixed;
+
+  top: 100px;
+  left: 100px;
+
+  width: 368px;
+  z-index: 9999;
+
+  background: #1e2a3a;
+  border-radius: 12px;
+  padding: 10px;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+
+  cursor: grab;
+
+  /* 🔥 SMOOTHNESS BOOST */
+  will-change: transform, left, top;
+  transition: none;                 /* ❌ disable lag */
+  user-select: none;               /* no text selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+
+  backface-visibility: hidden;     /* GPU rendering */
+  transform: translateZ(0);        /* hardware accel */
 }

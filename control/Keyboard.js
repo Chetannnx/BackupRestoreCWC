@@ -1,3 +1,5 @@
+
+document.body.classList.add("light-theme");
 // =========================
 // 🔥 FORMAT VALUE
 // =========================
@@ -7,7 +9,8 @@ function formatValue(val) {
   let num = parseFloat(val);
   if (isNaN(num)) return val.toString();
 
-  return num.toFixed(2);
+  // return num.toFixed(2);\
+  return Math.round(num).toString();
 }
 
 
@@ -178,16 +181,15 @@ function handleKey(key) {
 
     case "ENTER":
 
-  // 🔥 SEND VALUE TO control.js
+  // ✅ send value
   if (typeof window.writeValueFromKeyboard === "function") {
     window.writeValueFromKeyboard(currentValue);
   }
 
-  // 🔥 CLOSE POPUP
-  if (typeof HMIRuntime !== "undefined") {
-    HMIRuntime.UI.SysFct.ClosePopup("Keyboard");
-  } else {
-    console.log("ENTER (SIM):", currentValue);
+  // ✅ CLOSE HTML KEYBOARD
+  const kb = document.getElementById("keyboard");
+  if (kb) {
+    kb.classList.add("hidden");
   }
 
   return;
@@ -323,24 +325,24 @@ function buildKeyboard() {
   // =========================
   // 🔥 INFO ROW
   // =========================
-  const infoRow = document.createElement("div");
-  infoRow.className = "info-row";
+  // const infoRow = document.createElement("div");
+  // infoRow.className = "info-row";
 
-  const oldValueDiv = document.createElement("div");
-  oldValueDiv.className = "old-value";
-  oldValueDiv.innerText = "Old Value: " + (oldValue || "-");
+  // const oldValueDiv = document.createElement("div");
+  // oldValueDiv.className = "old-value";
+  // oldValueDiv.innerText = "Old Value: " + (oldValue || "-");
 
-  const rangeDiv = document.createElement("div");
-  rangeDiv.className = "range-bar";
-  rangeDiv.innerHTML = `
-    <span>Min: ${currentMin != null ? formatValue(currentMin) : "-"}</span>
-    <span>Max: ${currentMax != null ? formatValue(currentMax) : "-"}</span>
-  `;
+  // const rangeDiv = document.createElement("div");
+  // rangeDiv.className = "range-bar";
+  // rangeDiv.innerHTML = `
+  //   <span>Min: ${currentMin != null ? formatValue(currentMin) : "-"}</span>
+  //   <span>Max: ${currentMax != null ? formatValue(currentMax) : "-"}</span>
+  // `;
 
-  infoRow.appendChild(oldValueDiv);
-  infoRow.appendChild(rangeDiv);
+  // infoRow.appendChild(oldValueDiv);
+  // infoRow.appendChild(rangeDiv);
 
-  keyboardDiv.appendChild(infoRow);
+  // keyboardDiv.appendChild(infoRow);
 
   // =========================
   // 🔥 KEYS GRID
@@ -367,6 +369,38 @@ function buildKeyboard() {
 }
 
 // =========================
+// 🔥 DRAG KEYBOARD
+// =========================
+const keyboard = document.getElementById("keyboard");
+
+let isDragging = false;
+let offsetX = 0;
+let offsetY = 0;
+
+keyboard.addEventListener("mousedown", (e) => {
+  isDragging = true;
+
+  offsetX = e.clientX - keyboard.offsetLeft;
+  offsetY = e.clientY - keyboard.offsetTop;
+
+  keyboard.style.cursor = "grabbing";
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (!isDragging) return;
+
+  keyboard.style.left = (e.clientX - offsetX) + "px";
+  keyboard.style.top  = (e.clientY - offsetY) + "px";
+
+  keyboard.style.transform = "none"; // 🔥 disable center transform
+});
+
+document.addEventListener("mouseup", () => {
+  isDragging = false;
+  keyboard.style.cursor = "grab";
+});
+
+// =========================
 // 🔥 INIT EMPTY
 // =========================
-buildKeyboard();
+// buildKeyboard();
