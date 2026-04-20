@@ -5,6 +5,7 @@ const BACKUP_API  = "http://192.168.1.24:3000/api/backup";
 const RESTORE_API = "http://192.168.1.24:3000/api/restore";
 const STATUS_API = "http://192.168.1.24:3000/api/status";
 
+
 //=====================
 // ==========================
 // 🔥 OPEN KEYBOARD
@@ -150,8 +151,8 @@ function handleFileSelect(event) {
 // ==========================
 let lastAutoBackupTime = null;
 let lastManualBackupTime = null;
-let nextBackupTime = null;
-let backupIntervalMinutes = 0;
+// let nextBackupTime = null;
+// let backupIntervalMinutes = 0;
 
 // let currentSection = "auto";
 
@@ -216,7 +217,10 @@ window.addEventListener("DOMContentLoaded", function () {
   fetchStatus(); // first load
 
   setInterval(fetchStatus, 3000);   // 🔥 LIVE SQL DATA
-  setInterval(checkAutoBackup, 1000);
+  setInterval(() => {
+  checkAutoBackup();
+  updateStatusDisplay();
+}, 1000);
 
 });
 
@@ -259,30 +263,41 @@ window.addEventListener("DOMContentLoaded", function () {
 // ==========================
 function updateStatusDisplay() {
 
-  // ===== AUTO =====
   const autoEl = document.getElementById("autoStatus");
+  const backupEl = document.getElementById("backupStatus");
+  const restoreEl = document.getElementById("restoreStatus");
+
+  let msg = "";
+
+  const start = localStorage.getItem("autoBackupStart");
+  const interval = parseInt(localStorage.getItem("backupInterval"));
+  const lastRun = parseInt(localStorage.getItem("lastRunCount") || "0");
+
+  // ===== AUTO =====
   if (autoEl) {
-    let msg = "";
 
-    if (lastAutoBackupTime) {
-      msg += "🕒 Last Auto Backup: " + lastAutoBackupTime.toLocaleString() + "\n";
+    if (start && interval) {
+
+      const startTime = new Date(start);
+
+      if (lastRun > 0) {
+        const lastBackup = new Date(startTime.getTime() + lastRun * interval * 60000);
+        msg += "🕒 Last Backup: " + lastBackup.toLocaleString() + "\n";
+      }
+
+      const nextBackup = new Date(startTime.getTime() + (lastRun + 1) * interval * 60000);
+      msg += "⏭ Next Backup: " + nextBackup.toLocaleString() + "\n";
+
+      msg += "⏱ Interval: " + interval + " min";
+
+    } else {
+      msg = "No auto backup yet";
     }
-
-    if (nextBackupTime) {
-      msg += "⏭ Next Backup: " + nextBackupTime.toLocaleString() + "\n";
-    }
-
-    if (backupIntervalMinutes) {
-      msg += "⏱ Interval: " + backupIntervalMinutes + " min";
-    }
-
-    if (!msg) msg = "No auto backup yet";
 
     autoEl.innerText = "Auto Status:\n" + msg;
   }
 
-  // ===== MANUAL BACKUP =====
-  const backupEl = document.getElementById("backupStatus");
+  // ===== MANUAL =====
   if (backupEl) {
     if (lastManualBackupTime) {
       backupEl.innerText =
@@ -294,20 +309,17 @@ function updateStatusDisplay() {
   }
 
   // ===== RESTORE =====
-  const restoreEl = document.getElementById("restoreStatus");
   if (restoreEl) {
-    // const lastRestore = localStorage.getItem("lastRestoreTime");
-
-
-   if (lastRestoreTime) {
-  restoreEl.innerText =
-    "Restore Status:\n♻ Last Restore: " +
-    lastRestoreTime.toLocaleString();
-} else {
-  restoreEl.innerText = "Restore Status: No restore yet";
-}
+    if (lastRestoreTime) {
+      restoreEl.innerText =
+        "Restore Status:\n♻ Last Restore: " +
+        lastRestoreTime.toLocaleString();
+    } else {
+      restoreEl.innerText = "Restore Status: No restore yet";
+    }
   }
 }
+
 
 // ==========================
 // 🔥 SECTION TOGGLE
@@ -372,21 +384,28 @@ async function manualBackup() {
 // ==========================
 function checkAutoBackup() {
 
-  if (!backupIntervalMinutes || !nextBackupTime) return;
+  const start = localStorage.getItem("autoBackupStart");
+  const interval = localStorage.getItem("backupInterval");
 
+  if (!start || !interval) return;
+
+  const startTime = new Date(start);
   const now = new Date();
 
-  if (now >= nextBackupTime) {
+  const diffMinutes = (now - startTime) / 60000;
+
+  const runCount = Math.floor(diffMinutes / interval);
+
+  const lastRun = parseInt(localStorage.getItem("lastRunCount") || "0");
+
+  if (runCount > lastRun) {
+
+    console.log("🔥 Auto Backup Triggered");
 
     runAutoBackup();
 
-    // schedule next
-    nextBackupTime = new Date(now.getTime() + backupIntervalMinutes * 60000);
-
-    saveBackupState();
+    localStorage.setItem("lastRunCount", runCount);
   }
-
-  updateStatusDisplay();
 }
 
 // ==========================
@@ -404,7 +423,7 @@ async function runAutoBackup() {
 
     if (!res.ok) throw new Error(data.message);
 
-    // lastAutoBackupTime = new Date();
+    lastAutoBackupTime = new Date();
 
     saveBackupState();
 
@@ -426,14 +445,13 @@ function startAutoBackup() {
     return;
   }
 
-  backupIntervalMinutes = minutes;
+  const now = new Date();
 
-  nextBackupTime = new Date(Date.now() + minutes * 60000);
+  localStorage.setItem("autoBackupStart", now.toISOString());
+  localStorage.setItem("backupInterval", minutes);
+  localStorage.setItem("lastRunCount", 0);
 
-  saveBackupState();
-  updateStatusDisplay();
-
-  setStatus(`⏱ Auto Backup started (${minutes} min)`);
+  setStatus("⏱ Auto Backup Started (" + minutes + " min)");
 }
 
 // ==========================
