@@ -157,7 +157,16 @@
   </div>
 
   <!-- Hidden File Input -->
-  <input type="file" id="filePicker" accept=".bak,.sql" hidden onchange="handleFileSelect(event)">
+  <!-- <input type="file" id="filePicker" accept=".bak,.sql" hidden onchange="handleFileSelect(event)"> -->
+   <div id="filePopup" class="popup hidden">
+  <div class="popup-box">
+    <h3>Select Backup File</h3>
+
+    <div id="fileList"></div>
+
+    <button onclick="closePopup()">Close</button>
+  </div>
+</div>
   <input type="text" id="restorePath" hidden>
 
   <!-- Status -->

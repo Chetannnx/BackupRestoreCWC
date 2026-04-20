@@ -3,6 +3,7 @@
 // ==========================
 const BACKUP_API  = "http://192.168.1.24:3000/api/backup";
 const RESTORE_API = "http://192.168.1.24:3000/api/restore";
+const STATUS_API = "http://192.168.1.24:3000/api/status";
 
 //=====================
 // ==========================
@@ -27,6 +28,33 @@ function openKeyboard(input) {
   // store reference
   window.currentInput = input;
 }
+
+function parseSQLDate(dateStr) {
+  if (!dateStr) return null;
+
+  // convert "2026-04-18T15:50:59.000Z" OR SQL format to local
+  return new Date(dateStr.replace("Z", ""));
+}
+
+
+let lastRestoreTime = null;
+
+async function fetchStatus() {
+  try {
+    const res = await fetch(STATUS_API);
+    const data = await res.json();
+
+    if (data.auto) lastAutoBackupTime = parseSQLDate(data.auto);
+    if (data.manual) lastManualBackupTime = parseSQLDate(data.manual);
+    if (data.restore) lastRestoreTime = parseSQLDate(data.restore);
+
+    updateStatusDisplay();
+
+  } catch (err) {
+    console.error("❌ Status fetch error:", err);
+  }
+}
+fetchStatus();
 
 // ==========================
 // 🔥 RECEIVE VALUE FROM KEYBOARD
@@ -80,8 +108,29 @@ function showTab(event, tabName) {
   updateStatusDisplay();
 }
 
-function openFilePicker() {
-  document.getElementById("filePicker").click();
+// function openFilePicker() {
+//   document.getElementById("filePicker").click();
+// }
+function closePopup() {
+  document.getElementById("filePopup").classList.add("hidden");
+}
+
+function selectFile(fileName) {
+
+  const fullPath = "D:\\Chetan\\DBBackup\\" + fileName;
+
+  document.getElementById("restorePath").value = fullPath;
+
+  // UI update
+  document.getElementById("uploadContent").classList.add("hidden");
+
+  const fileDiv = document.getElementById("selectedFile");
+  fileDiv.classList.remove("hidden");
+  fileDiv.innerText = fileName;
+
+  setStatus("restore", "📄 Selected: " + fullPath);
+
+  closePopup();
 }
 
 function handleFileSelect(event) {
@@ -155,45 +204,55 @@ function setStatus(type, message) {
 // ==========================
 // 🔥 LOAD STATE
 // ==========================
-window.addEventListener("DOMContentLoaded", function () {
-  loadBackupState();
+// window.addEventListener("DOMContentLoaded", function () {
+//   loadBackupState();
 
-  // ✅ Always running checker (PLC style)
+//   // ✅ Always running checker (PLC style)
+//   setInterval(checkAutoBackup, 1000);
+// });
+
+window.addEventListener("DOMContentLoaded", function () {
+
+  fetchStatus(); // first load
+
+  setInterval(fetchStatus, 3000);   // 🔥 LIVE SQL DATA
   setInterval(checkAutoBackup, 1000);
+
 });
 
-function loadBackupState() {
 
-  const auto = localStorage.getItem("lastAutoBackupTime");
-  const manual = localStorage.getItem("lastManualBackupTime");
-  const next = localStorage.getItem("nextBackupTime");
-  const interval = localStorage.getItem("backupInterval");
+// function loadBackupState() {
 
-  if (auto) lastAutoBackupTime = new Date(auto);
-  if (manual) lastManualBackupTime = new Date(manual);
-  if (next) nextBackupTime = new Date(next);
-  if (interval) backupIntervalMinutes = parseInt(interval);
+//   const auto = localStorage.getItem("lastAutoBackupTime");
+//   const manual = localStorage.getItem("lastManualBackupTime");
+//   const next = localStorage.getItem("nextBackupTime");
+//   const interval = localStorage.getItem("backupInterval");
 
-  updateStatusDisplay();
-}
+//   if (auto) lastAutoBackupTime = new Date(auto);
+//   if (manual) lastManualBackupTime = new Date(manual);
+//   if (next) nextBackupTime = new Date(next);
+//   if (interval) backupIntervalMinutes = parseInt(interval);
+
+//   updateStatusDisplay();
+// }
 
 // ==========================
 // 🔥 SAVE STATE
 // ==========================
-function saveBackupState() {
+// function saveBackupState() {
 
-  if (lastAutoBackupTime)
-    localStorage.setItem("lastAutoBackupTime", lastAutoBackupTime.toISOString());
+//   if (lastAutoBackupTime)
+//     localStorage.setItem("lastAutoBackupTime", lastAutoBackupTime.toISOString());
 
-  if (lastManualBackupTime)
-    localStorage.setItem("lastManualBackupTime", lastManualBackupTime.toISOString());
+//   if (lastManualBackupTime)
+//     localStorage.setItem("lastManualBackupTime", lastManualBackupTime.toISOString());
 
-  if (nextBackupTime)
-    localStorage.setItem("nextBackupTime", nextBackupTime.toISOString());
+//   if (nextBackupTime)
+//     localStorage.setItem("nextBackupTime", nextBackupTime.toISOString());
 
-  if (backupIntervalMinutes)
-    localStorage.setItem("backupInterval", backupIntervalMinutes.toString());
-}
+//   if (backupIntervalMinutes)
+//     localStorage.setItem("backupInterval", backupIntervalMinutes.toString());
+// }
 
 // ==========================
 // 🔥 STATUS DISPLAY
@@ -237,15 +296,16 @@ function updateStatusDisplay() {
   // ===== RESTORE =====
   const restoreEl = document.getElementById("restoreStatus");
   if (restoreEl) {
-    const lastRestore = localStorage.getItem("lastRestoreTime");
+    // const lastRestore = localStorage.getItem("lastRestoreTime");
 
-    if (lastRestore) {
-      restoreEl.innerText =
-        "Restore Status:\n♻ Last Restore: " +
-        new Date(lastRestore).toLocaleString();
-    } else {
-      restoreEl.innerText = "Restore Status: No restore yet";
-    }
+
+   if (lastRestoreTime) {
+  restoreEl.innerText =
+    "Restore Status:\n♻ Last Restore: " +
+    lastRestoreTime.toLocaleString();
+} else {
+  restoreEl.innerText = "Restore Status: No restore yet";
+}
   }
 }
 
@@ -286,12 +346,17 @@ async function manualBackup() {
   setStatus("Taking backup...");
 
   try {
-    const res = await fetch(BACKUP_API, { method: "POST" });
+    const res = await fetch(BACKUP_API, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ type: "MANUAL" })
+});
+
     const data = await res.json();
 
     if (!res.ok) throw new Error(data.message);
 
-    lastManualBackupTime = new Date();
+    // lastManualBackupTime = new Date();
 
     saveBackupState();
     updateStatusDisplay();
@@ -330,12 +395,16 @@ function checkAutoBackup() {
 async function runAutoBackup() {
 
   try {
-    const res = await fetch(BACKUP_API, { method: "POST" });
+    const res = await fetch(BACKUP_API, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ type: "AUTO" })
+});
     const data = await res.json();
 
     if (!res.ok) throw new Error(data.message);
 
-    lastAutoBackupTime = new Date();
+    // lastAutoBackupTime = new Date();
 
     saveBackupState();
 
@@ -391,7 +460,7 @@ async function restoreFromPath() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message);
 
-    localStorage.setItem("lastRestoreTime", new Date().toISOString());
+    // localStorage.setItem("lastRestoreTime", new Date().toISOString());
 
     setStatus("✅ Restore Success");
     updateStatusDisplay();
@@ -403,8 +472,38 @@ async function restoreFromPath() {
 }
 
 
-function openFilePicker() {
-  document.getElementById("filePicker").click();
+// function openFilePicker() {
+//   document.getElementById("filePicker").click();
+// }
+async function openFilePicker() {
+
+  const popup = document.getElementById("filePopup");
+  const fileList = document.getElementById("fileList");
+
+  popup.classList.remove("hidden");
+  fileList.innerHTML = "Loading...";
+
+  try {
+    const res = await fetch("http://192.168.1.24:3000/api/backups");
+    const files = await res.json();
+
+    fileList.innerHTML = "";
+
+    files.forEach(f => {
+      const div = document.createElement("div");
+      div.className = "file-item";
+
+      // show name + date
+      div.innerText = f.name + " (" + new Date(f.time).toLocaleString() + ")";
+
+      div.onclick = () => selectFile(f.name);
+
+      fileList.appendChild(div);
+    });
+
+  } catch (err) {
+    fileList.innerHTML = "❌ Failed to load files";
+  }
 }
 
 document.getElementById("filePicker").addEventListener("change", function (e) {

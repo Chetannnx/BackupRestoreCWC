@@ -389,10 +389,31 @@ keyboard.addEventListener("mousedown", (e) => {
 document.addEventListener("mousemove", (e) => {
   if (!isDragging) return;
 
-  keyboard.style.left = (e.clientX - offsetX) + "px";
-  keyboard.style.top  = (e.clientY - offsetY) + "px";
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
 
-  keyboard.style.transform = "none"; // 🔥 disable center transform
+  const kbWidth = keyboard.offsetWidth;
+  const kbHeight = keyboard.offsetHeight;
+
+  let newLeft = e.clientX - offsetX;
+  let newTop  = e.clientY - offsetY;
+
+  // 🔥 HORIZONTAL LIMIT
+  if (newLeft < 0) newLeft = 0;
+  if (newLeft + kbWidth > screenWidth) {
+    newLeft = screenWidth - kbWidth;
+  }
+
+  // 🔥 VERTICAL LIMIT
+  if (newTop < 0) newTop = 0;
+  if (newTop + kbHeight > screenHeight) {
+    newTop = screenHeight - kbHeight;
+  }
+
+  keyboard.style.left = newLeft + "px";
+  keyboard.style.top  = newTop + "px";
+
+  keyboard.style.transform = "none";
 });
 
 document.addEventListener("mouseup", () => {
