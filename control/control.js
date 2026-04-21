@@ -355,7 +355,8 @@ async function manualBackup() {
 
   if (!confirm("Take backup now?")) return;
 
-  setStatus("Taking backup...");
+  // setStatus("Taking backup...");
+  setStatus("backup", "Taking backup...");
 
   try {
     const res = await fetch(BACKUP_API, {
@@ -370,7 +371,7 @@ async function manualBackup() {
 
     // lastManualBackupTime = new Date();
 
-    saveBackupState();
+    // saveBackupState();
     updateStatusDisplay();
 
   } catch (err) {
@@ -425,7 +426,7 @@ async function runAutoBackup() {
 
     lastAutoBackupTime = new Date();
 
-    saveBackupState();
+    // saveBackupState();
 
   } catch (err) {
     console.error(err);
@@ -524,44 +525,85 @@ async function openFilePicker() {
   }
 }
 
-document.getElementById("filePicker").addEventListener("change", function (e) {
+// document.getElementById("filePicker").addEventListener("change", function (e) {
 
-  const file = e.target.files[0];
+//   const file = e.target.files[0];
 
-  if (file) {
-    const fullPath = "D:\\Chetan\\DBBackup\\" + file.name;
+//   if (file) {
+//     const fullPath = "D:\\Chetan\\DBBackup\\" + file.name;
 
-    document.getElementById("restorePath").value = fullPath;
+//     document.getElementById("restorePath").value = fullPath;
 
-    setStatus("📄 File selected: " + fullPath);
-  }
-});
+//     setStatus("📄 File selected: " + fullPath);
+//   }
+// });
+const fp = document.getElementById("filePicker");
+if (fp) {
+  fp.addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (file) {
+      const fullPath = "D:\\Chetan\\DBBackup\\" + file.name;
+      document.getElementById("restorePath").value = fullPath;
+      setStatus("restore", "📄 File selected: " + fullPath);
+    }
+  });
+}
+function stopAutoBackup() {
+  localStorage.removeItem("autoBackupStart");
+  localStorage.removeItem("backupInterval");
+  localStorage.removeItem("lastRunCount");
+
+  setStatus("auto", "⛔ Auto Backup Stopped");
+}
 
 // ==========================
 // 🔥 WEBCC START
 // ==========================
 WebCC.start(
   function (result) {
-    if (result) {
-      console.log("✅ CWC Backup UI Started");
-      setStatus("Ready");
-    } else {
-      console.error("❌ WebCC Failed");
+
+    if (!result) {
+      console.error("❌ WebCC Failed to start");
+      return;
+    }
+
+    console.log("✅ CWC Backup UI Started");
+
+    try {
+      // 🔥 Make sure UI is visible
+      document.body.style.display = "block";
+
+      // 🔥 Safe status init
+      setStatus("auto", "Ready");
+
+      // 🔥 Initialize UI (IMPORTANT in Unified)
+      if (typeof fetchStatus === "function") fetchStatus();
+      if (typeof updateStatusDisplay === "function") updateStatusDisplay();
+
+    } catch (err) {
+      console.error("❌ Init Error:", err);
     }
   },
   {
     methods: {
       startBackup: function () {
-        manualBackup();
+        if (typeof manualBackup === "function") manualBackup();
       },
+
       startAutoBackup: function () {
-        startAutoBackup();
+        if (typeof startAutoBackup === "function") startAutoBackup();
       },
+
       stopAutoBackup: function () {
-        stopAutoBackup();
+        if (typeof stopAutoBackup === "function") {
+          stopAutoBackup();
+        } else {
+          console.warn("⚠ stopAutoBackup not defined");
+        }
       },
+
       restoreBackup: function () {
-        restoreFromPath();
+        if (typeof restoreFromPath === "function") restoreFromPath();
       }
     },
 
