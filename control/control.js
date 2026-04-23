@@ -70,6 +70,9 @@ function renderPaginationControls() {
   fileList.appendChild(nav);
 }
 
+
+
+
 //=====================
 // ==========================
 // 🔥 OPEN KEYBOARD
@@ -278,13 +281,48 @@ function setStatus(type, message) {
 
 window.addEventListener("DOMContentLoaded", function () {
 
-  fetchStatus(); // first load
+  fetchStatus();
 
-  setInterval(fetchStatus, 3000);   // 🔥 LIVE SQL DATA
+  const saved = localStorage.getItem("autoEnabled");
+  const checkbox = document.getElementById("autoEnable");
+  const startBtn = document.getElementById("startBtn");
+
+  if (checkbox && startBtn) {
+
+    // ✅ Restore state
+    checkbox.checked = (saved === "true");
+
+    // ✅ Set initial button state
+    startBtn.disabled = !checkbox.checked;
+
+    checkbox.addEventListener("change", function () {
+
+  if (this.checked) {
+    localStorage.setItem("autoEnabled", "true");
+    setStatus("auto", "✅ Auto Backup Enabled");
+
+    startBtn.disabled = false;
+
+  } else {
+    localStorage.setItem("autoEnabled", "false");
+
+    // 🔥 FULL STOP (IMPORTANT)
+    stopAutoBackup();   // ✅ this will clear all process
+
+    setStatus("auto", "⛔ Auto Backup Stopped");
+
+    startBtn.disabled = true;
+  }
+
+});
+  }
+
+  setInterval(fetchStatus, 3000);
+
   setInterval(() => {
-  checkAutoBackup();
-  updateStatusDisplay();
-}, 1000);
+    checkAutoBackup();
+    updateStatusDisplay();
+  }, 1000);
 
 });
 
@@ -321,6 +359,7 @@ window.addEventListener("DOMContentLoaded", function () {
 //   if (backupIntervalMinutes)
 //     localStorage.setItem("backupInterval", backupIntervalMinutes.toString());
 // }
+
 
 // ==========================
 // 🔥 STATUS DISPLAY
@@ -459,6 +498,12 @@ async function manualBackup() {
 // ==========================
 function checkAutoBackup() {
 
+  const isEnabled = document.getElementById("autoEnable").checked;
+  const storedEnabled = localStorage.getItem("autoEnabled");
+
+  // ❌ If checkbox OFF → pause
+  if (!isEnabled || storedEnabled !== "true") return;
+
   const start = localStorage.getItem("autoBackupStart");
   const interval = localStorage.getItem("backupInterval");
 
@@ -468,7 +513,6 @@ function checkAutoBackup() {
   const now = new Date();
 
   const diffMinutes = (now - startTime) / 60000;
-
   const runCount = Math.floor(diffMinutes / interval);
 
   const lastRun = parseInt(localStorage.getItem("lastRunCount") || "0");
@@ -513,6 +557,13 @@ async function runAutoBackup() {
 // ==========================
 function startAutoBackup() {
 
+  const isEnabled = document.getElementById("autoEnable").checked;
+
+  if (!isEnabled) {
+    alert("Enable Auto Backup first");
+    return;
+  }
+
   const minutes = parseInt(document.getElementById("backupMinutes").value);
 
   if (!minutes || minutes <= 0) {
@@ -525,8 +576,9 @@ function startAutoBackup() {
   localStorage.setItem("autoBackupStart", now.toISOString());
   localStorage.setItem("backupInterval", minutes);
   localStorage.setItem("lastRunCount", 0);
+  localStorage.setItem("autoEnabled", "true");   // ✅ NEW
 
-  setStatus("⏱ Auto Backup Started (" + minutes + " min)");
+  setStatus("auto", "⏱ Auto Backup Started (" + minutes + " min)");
 }
 
 // ==========================

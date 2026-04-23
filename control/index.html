@@ -82,9 +82,17 @@
 
   <!-- Interval -->
   <div class="form-group inline">
+    <div class="checkbox-container">
+      <label class="checkbox">
+        <input type="checkbox" id="autoEnable" />
+        Auto Backup
+      </label>
+    </div>
     <div>
+      
       <label>INTERVAL</label>
       <div class="input-box small">
+        
         <!-- <input id="backupMinutes" type="number" value="1"> -->
          <input id="backupMinutes" type="number" value="1" readonly onclick="openKeyboard(this)">
         <span class="unit">MIN</span>
@@ -106,7 +114,7 @@
   </div>
 
   <!-- Button -->
-  <button class="start-btn" onclick="startAutoBackup()">
+  <button id="startBtn" class="start-btn" onclick="startAutoBackup()">
     ▶ Start Auto Backup
   </button>
 

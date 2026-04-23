@@ -597,3 +597,23 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  margin-top: 22px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  gap: 8px;
+}
+
+#startBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
