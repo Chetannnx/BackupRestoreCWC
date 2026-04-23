@@ -6,6 +6,70 @@ const RESTORE_API = "http://192.168.1.24:3000/api/restore";
 const STATUS_API = "http://192.168.1.24:3000/api/status";
 
 
+let allFiles = [];
+let currentPage = 1;
+const pageSize = 6;
+
+function renderFilePage() {
+
+  const fileList = document.getElementById("fileList");
+  fileList.innerHTML = "";
+
+  const start = (currentPage - 1) * pageSize;
+  const end = start + pageSize;
+
+  const pageItems = allFiles.slice(start, end);
+
+  pageItems.forEach(f => {
+    const div = document.createElement("div");
+    div.className = "file-item";
+
+    div.innerText = f.name + 
+      " (" + new Date(f.time).toLocaleString() + ")";
+
+    div.onclick = () => selectFile(f.name);
+
+    fileList.appendChild(div);
+  });
+
+  renderPaginationControls();
+}
+
+function renderPaginationControls() {
+
+  const fileList = document.getElementById("fileList");
+
+  const totalPages = Math.ceil(allFiles.length / pageSize);
+
+  const nav = document.createElement("div");
+  nav.className = "pagination";
+
+  const prevBtn = document.createElement("button");
+  prevBtn.innerText = "⬅ Prev";
+  prevBtn.disabled = currentPage === 1;
+  prevBtn.onclick = () => {
+    currentPage--;
+    renderFilePage();
+  };
+
+  const nextBtn = document.createElement("button");
+  nextBtn.innerText = "Next ➡";
+  nextBtn.disabled = currentPage === totalPages;
+  nextBtn.onclick = () => {
+    currentPage++;
+    renderFilePage();
+  };
+
+  const info = document.createElement("span");
+  info.innerText = ` Page ${currentPage} / ${totalPages} `;
+
+  nav.appendChild(prevBtn);
+  nav.appendChild(info);
+  nav.appendChild(nextBtn);
+
+  fileList.appendChild(nav);
+}
+
 //=====================
 // ==========================
 // 🔥 OPEN KEYBOARD
@@ -269,33 +333,43 @@ function updateStatusDisplay() {
 
   let msg = "";
 
+  // const start = localStorage.getItem("autoBackupStart");
+  // const interval = parseInt(localStorage.getItem("backupInterval"));
+  // const lastRun = parseInt(localStorage.getItem("lastRunCount") || "0");
+
+  // ===== AUTO =====
+ if (autoEl) {
+
+  let msg = "";
+
+  // ✅ LAST BACKUP FROM SQL
+  if (lastAutoBackupTime) {
+    msg += "🕒 Last Backup: " +
+      lastAutoBackupTime.toLocaleString() + "\n";
+  }
+
+  // ✅ NEXT BACKUP FROM FRONTEND TIMER
   const start = localStorage.getItem("autoBackupStart");
   const interval = parseInt(localStorage.getItem("backupInterval"));
   const lastRun = parseInt(localStorage.getItem("lastRunCount") || "0");
 
-  // ===== AUTO =====
-  if (autoEl) {
+  if (start && interval) {
+    const startTime = new Date(start);
 
-    if (start && interval) {
+    const nextBackup = new Date(
+      startTime.getTime() + (lastRun + 1) * interval * 60000
+    );
 
-      const startTime = new Date(start);
+    msg += "⏭ Next Backup: " +
+      nextBackup.toLocaleString() + "\n";
 
-      if (lastRun > 0) {
-        const lastBackup = new Date(startTime.getTime() + lastRun * interval * 60000);
-        msg += "🕒 Last Backup: " + lastBackup.toLocaleString() + "\n";
-      }
-
-      const nextBackup = new Date(startTime.getTime() + (lastRun + 1) * interval * 60000);
-      msg += "⏭ Next Backup: " + nextBackup.toLocaleString() + "\n";
-
-      msg += "⏱ Interval: " + interval + " min";
-
-    } else {
-      msg = "No auto backup yet";
-    }
-
-    autoEl.innerText = "Auto Status:\n" + msg;
+    msg += "⏱ Interval: " + interval + " min";
   }
+
+  if (!msg) msg = "No auto backup yet";
+
+  autoEl.innerText = "Auto Status:\n" + msg;
+}
 
   // ===== MANUAL =====
   if (backupEl) {
@@ -504,21 +578,24 @@ async function openFilePicker() {
 
   try {
     const res = await fetch("http://192.168.1.24:3000/api/backups");
-    const files = await res.json();
+    // const files = await res.json();
 
-    fileList.innerHTML = "";
+    // fileList.innerHTML = "";
 
-    files.forEach(f => {
-      const div = document.createElement("div");
-      div.className = "file-item";
+    // files.forEach(f => {
+    //   const div = document.createElement("div");
+    //   div.className = "file-item";
 
-      // show name + date
-      div.innerText = f.name + " (" + new Date(f.time).toLocaleString() + ")";
+    //   // show name + date
+    //   div.innerText = f.name + " (" + new Date(f.time).toLocaleString() + ")";
 
-      div.onclick = () => selectFile(f.name);
+    //   div.onclick = () => selectFile(f.name);
 
-      fileList.appendChild(div);
-    });
+    //   fileList.appendChild(div);
+    // });
+    allFiles = await res.json();
+currentPage = 1;
+renderFilePage();
 
   } catch (err) {
     fileList.innerHTML = "❌ Failed to load files";
